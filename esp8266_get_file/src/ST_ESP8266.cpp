@@ -36,6 +36,8 @@
 // 7  OFF
 // 8  OFF
 //
+#define THIS_PROJECT_HAS_ESP8266
+
 #include <ESP8266WiFi.h>
 #include <FS.h>
 
@@ -47,6 +49,7 @@
 
 
 using namespace SatTrack;
+
 
 // -------------------------------------------------------
 // Configuring user messages in an appropriate language

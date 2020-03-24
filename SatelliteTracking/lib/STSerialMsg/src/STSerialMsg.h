@@ -8,7 +8,7 @@
 
 // TO-DO:
 ///     BORRAME desde aqui
-#define SHOW_SERIAL_TRACE_READ true
+#define SHOW_SERIAL_TRACE_READ false
 #define SHOW_SERIAL_TRACE_WRITE false
 ///     BORRAME hasta aqui
 
@@ -134,7 +134,7 @@ namespace SatTrack
         //// char commandWrite();
         //// String commandInfoWrite();
         
-        // FIX-ME ############# ESTAS AQUI ##########################################
+        // FIX-ME #######################################################
         //  Create m_newCommandRead, m_newCommandWrite, m_commandRead, m_commandWrite
         //      resetCommandRead(), private: m_resetCommandWrite()
         //      newCommandRead(), (NO: newCommandWrite()), commandRead(), (NO: commandWrite()), commandInfoRead(), (NO: commandInfoWrite())

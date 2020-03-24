@@ -5,14 +5,14 @@
 
 
 // How is put your device X and Y reference system?
-// X axis to rigth side
-const double X_AXIS_RIGHT = 0;
-// X axis to forward
-const double X_AXIS_FORWARD = 90;
-// X axis to left side
-const double X_AXIS_LEFT = 180;
-// X axis to backward
-const double X_AXIS_BACKWARD = 270;
+typedef enum 
+{ 
+    ACC_GYRO_X_AXIS_FORWARD = 0, // X axis to forward
+    ACC_GYRO_X_AXIS_LEFT = 90 , // X axis to left side
+    ACC_GYRO_X_AXIS_BACKWARD = 180, // X axis to backward
+    ACC_GYRO_X_AXIS_RIGHT = 270 // X axis to rigth side
+} gyroXposition;
+
 
 
 const word IMU_MPU6050_ADDRS = 0x68;

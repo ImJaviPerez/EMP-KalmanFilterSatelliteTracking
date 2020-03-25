@@ -5,11 +5,6 @@ subtitle: "Localización de satélites"
 author: "F. Javier Pérez Ramírez. UPV-EHU"
 date: "27 de enero de 2020"
 output:
-  html_document:
-    df_print: paged
-    toc: yes
-    toc_depth: '3'
-    number_sections: yes
   pdf_document:
     keep_tex: yes
     number_sections: yes
@@ -17,6 +12,11 @@ output:
     toc_depth: 3
     fig_caption: yes
     fig_height: 4
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+    number_sections: yes
 header-includes:
 - \usepackage{float}          # To insert figures caption
 - \floatplacement{figure}{H}  # To insert figures caption
@@ -192,56 +192,6 @@ plot.zoo(angXY,
 
 # Kalman{#sec:kalman}
 
-Se muestran los datos proporcionados por el dispositivo MPU6050
-
-```{r}
-plotAnglesARK <- function(theAxix="X"){
-  
-  if (theAxix=="X")
-  {
-    dfData <- data.frame(accAngle = angXY.df$rollAccX, 
-                        csGyro=angXY.df$csGyroX, 
-                        kalmanAngle=angXY.df$kalAngleX, 
-                        t=angXY.df$micros/1000)
-      mainAnglesGG <- ggplot(data=dfData, 
-           aes(x=t, y=accAngle, colour="Roll")) +
-      geom_line() +
-      scale_colour_manual("", 
-                        breaks = c("Roll", "csGyro", "KalmanMPU"),
-                        values = c("Roll"="blue", 
-                                   "gyroAngle"="darkorange", 
-                                   "csGyro"="red", 
-                                   "KalmanMPU"="black")) +
-      ggtitle("Angulo eje X")
-  }else{
-    dfData <- data.frame(accAngle = angXY.df$pitchAccY, 
-                        csGyro=angXY.df$csGyroY, 
-                        kalmanAngle=angXY.df$kalAngleY, 
-                        t=angXY.df$micros/1000)
-    mainAnglesGG <- ggplot(data=dfData, 
-           aes(x=t, y=accAngle, colour="Pitch")) +
-      geom_line() +
-      scale_colour_manual("", 
-                        breaks = c("Pitch", "csGyro", "KalmanMPU"),
-                        values = c("Pitch"="blue", 
-                                   "gyroAngle"="darkorange", 
-                                   "csGyro"="red", 
-                                   "KalmanMPU"="black")) +
-      ggtitle("Angulo eje Y")
-  }
-  
-  mainAnglesGG +
-    geom_line(data = dfData, aes(x=t, y=csGyro, colour = "csGyro")) +
-    geom_line(data = dfData, aes(x=t, y=kalmanAngle, colour = "KalmanMPU")) +
-    ylab("Ángulo (º)") + xlab("t (ms)") +
-    theme_bw()
-}
-plotAnglesARK(theAxix="X")
-
-plotAnglesARK(theAxix="Y")
-```
-
-
 Modelo físico:
 
 $$\theta(t) \approx \theta(t-1) + \Delta t \cdot \omega(t-1)$$
@@ -331,7 +281,7 @@ mDim <- 6
 a1 <- rep(0,mDim)
 ####a1 <- matrix(rep(0,mDim*pDim), nr=pDim)
 # C0 # dimension [m,m]
-P1 <- 10 * diag(mDim)
+P1 <- 10^7 * diag(mDim)
 
 # Matrix by columns
 # FF # dimension [p,m]
@@ -345,7 +295,7 @@ ZZ <- matrix(c(1,0,0, 0,0,0, 1,0,0,
 HH <- diag(1.3,pDim)
 # GG # dimension [m,m]
 TT <- diag(mDim)
-# W # dimension [m,1] o [r,r] # FIX-ME : ESTA PUEDE TENER ERROR
+# W # dimension [m,m]
 QQ <-  diag(0.1,mDim)
 
 # JGG # dimension [m,m]
@@ -368,8 +318,7 @@ modAGC$m0[2] = angXY.df$pitchAccY[1]
 modAGC$m0[3] = angXY.df$yawZcompass[1]
 modAGC$m0[4] = angXY.df$gyroXrate[1]
 modAGC$m0[5] = angXY.df$gyroYrate[1]
-# FIX-ME : Falta leer gyroZrate
-# modAGC$m0[6] = angXY.df$gyroZrate[1]
+modAGC$m0[6] = angXY.df$gyroZrate[1]
 
 modAGC
 ```
@@ -410,9 +359,9 @@ Y filtramos:
 
 ```{r}
 # All but first row, columns 1 and 2
-ang <- dlmFilter(angXY, modAGC, simplify=TRUE)$m[-1,1:2]
-colnames(ang) <- c("X","Y")
-ang <- zoo(ang, order.by=index(angXY))
+kalmanR <- dlmFilter(angXY, modAGC, simplify=TRUE)$m[-1,1:2]
+colnames(kalmanR) <- c("X","Y")
+kalmanR <- zoo(kalmanR, order.by=index(angXY))
 ```
 
 Comparemos, por ejemplo, para el ángulo $X$ (`rollAccX`):
@@ -456,7 +405,6 @@ kalman3 <- function(y,x0,P0,Q,H) {
   vero <- array(rep(0,pDim*mDim), dims)
 
   for (i in 1:(n-1)) {
-    
     if (!anyNA(y[i])) {
       # Se calcula la innovacion. Ver Durbin p.86:
       # inno = y_t - E(y_t|Y_{t-1}) = y_t - Z_t a_t
@@ -491,7 +439,19 @@ kalman3 <- function(y,x0,P0,Q,H) {
 ```
 
 ```{r}
-result   <- kalman3(y=angXY, x0=rep(0,mDim), P0=diag(10^7,mDim), Q=QQ, H=HH)
+# Initial Values
+x0 <- rep(0,mDim)
+# x0[1] = angXY.df$rollAccX[1]
+# x0[2] = angXY.df$pitchAccY[1]
+# x0[3] = angXY.df$yawZcompass[1]
+# x0[4] = angXY.df$gyroXrate[1]
+# x0[5] = angXY.df$gyroYrate[1]
+# x0[6] = angXY.df$gyroZrate[1]
+
+# We put same initial values used with Kalman Filter before to test that we obtain same results
+x0 <- modAGC$m0
+P0 <- P1 # diag(10^7,mDim)
+result   <- kalman3(y=angXY, x0=x0, P0=P1, Q=modAGC$W, H=modAGC$V)
 # result$x
 # result$vero
 ```
@@ -512,28 +472,28 @@ plotAnglesAGC_KmpuKcalc <- function(theAxix="X"){
                         csGyro=angXY.df$csGyroX,
                         rollXcompass=angXY.df$rollXcompass, 
                         kalmanAngleMPU6050=angXY.df$kalAngleX,
-                        kalmanAngle=ang$X, 
-                        kalmanCalcX=angXY.df$calcKalmanX,
+                        kalmanR=kalmanR$X, 
+                        kalmanRCalc=angXY.df$calcKalmanX,
                         t=angXY.df$micros/1000)
     mainAnglesGG <- ggplot(data=dfData, 
-           aes(x=t, y=accAngleX, colour="Ángulo acelerómetro X")) +
+           aes(x=t, y=accAngleX, colour="Acelerómetro X")) +
       geom_line() +
       scale_colour_manual("", 
-                        breaks = c("Ángulo acelerómetro X", "Ángulo giróscopo", "Ángulo compass", "kalmanMPU", "Kalman", "kalmanCalc"),
-                        values = c("Ángulo acelerómetro X"="blue", 
-                                   "Ángulo giróscopo"="darkorange", 
-                                   "Ángulo compass"="red",
-                                   "kalmanMPU" = "black",
-                                   "Kalman"="green",
-                                   "kalmanCalc"="darkorchid"))
+                        breaks = c("Acelerómetro X", "Giróscopo", "Brújula", "Kalman MPU", "kalman R", "Kalman R calc"),
+                        values = c("Acelerómetro X"="blue", 
+                                   "Giróscopo"="darkorange", 
+                                   "Brújula"="red",
+                                   "Kalman MPU" = "black",
+                                   "kalman R"="green",
+                                   "Kalman R calc"="darkorchid"))
       ## ggtitle("Angulo eje X")
       
     mainAnglesGG +
-      geom_line(data = dfData, aes(x=t, y=csGyro, colour = "Ángulo giróscopo")) +
-      geom_line(data = dfData, aes(x=t, y=rollXcompass, colour = "Ángulo compass")) +
-      geom_line(data = dfData, aes(x=t, y=kalmanAngleMPU6050, colour = "kalmanMPU")) +
-      geom_line(data = dfData, aes(x=t, y=kalmanAngle, colour = "Kalman")) +
-      geom_line(data = dfData, aes(x=t, y=kalmanAngle, colour = "kalmanCalc")) +
+      geom_line(data = dfData, aes(x=t, y=csGyro, colour = "Giróscopo")) +
+      geom_line(data = dfData, aes(x=t, y=rollXcompass, colour = "Brújula")) +
+      geom_line(data = dfData, aes(x=t, y=kalmanAngleMPU6050, colour = "Kalman MPU")) +
+      geom_line(data = dfData, aes(x=t, y=kalmanR, colour = "kalman R")) +
+      geom_line(data = dfData, aes(x=t, y=kalmanRCalc, colour = "Kalman R calc")) +
       ylab("Ángulo (º)") + xlab("t (ms)") +
       theme_bw()
   }
@@ -543,28 +503,28 @@ plotAnglesAGC_KmpuKcalc <- function(theAxix="X"){
                         csGyro=angXY.df$csGyroY,
                         pitchYcompass=angXY.df$pitchYcompass, 
                         kalmanAngleMPU6050=angXY.df$kalAngleY,
-                        kalmanAngle=ang$Y, 
-                        kalmanCalcX=angXY.df$calcKalmanY, 
+                        kalmanR=kalmanR$Y, 
+                        kalmanRCalc=angXY.df$calcKalmanY, 
                         t=angXY.df$micros/1000)
     mainAnglesGG <- ggplot(data=dfData, 
-           aes(x=t, y=accAngleY, colour="Ángulo acelerómetro Y")) +
+           aes(x=t, y=accAngleY, colour="Acelerómetro Y")) +
       geom_line() +
       scale_colour_manual("", 
-                        breaks = c("Ángulo acelerómetro Y", "Ángulo giróscopo", "Ángulo compass", "kalmanMPU", "Kalman", "kalmanCalc"),
-                        values = c("Ángulo acelerómetro Y"="blue",  
-                                   "Ángulo giróscopo"="darkorange",
-                                   "Ángulo compass"="red",
-                                   "kalmanMPU" = "black",
-                                   "Kalman"="green",
-                                   "kalmanCalc"="darkorchid"))
+                        breaks = c("Acelerómetro Y", "Giróscopo", "Brújula", "Kalman MPU", "kalman R", "Kalman R calc"),
+                        values = c("Acelerómetro Y"="blue",  
+                                   "Giróscopo"="darkorange",
+                                   "Brújula"="red",
+                                   "Kalman MPU" = "black",
+                                   "kalman R"="green",
+                                   "Kalman R calc"="darkorchid"))
       ## ggtitle("Angulo eje Y")
       
     mainAnglesGG +
-      geom_line(data = dfData, aes(x=t, y=csGyro, colour = "Ángulo giróscopo")) +
-      geom_line(data = dfData, aes(x=t, y=pitchYcompass, colour = "Ángulo compass")) +
-      #geom_line(data = dfData, aes(x=t, y=kalmanAngleMPU6050, colour = "kalmanMPU")) +
-      geom_line(data = dfData, aes(x=t, y=kalmanAngle, colour = "Kalman")) +
-      geom_line(data = dfData, aes(x=t, y=kalmanAngle, colour = "kalmanCalc")) +
+      geom_line(data = dfData, aes(x=t, y=csGyro, colour = "Giróscopo")) +
+      geom_line(data = dfData, aes(x=t, y=pitchYcompass, colour = "Brújula")) +
+      geom_line(data = dfData, aes(x=t, y=kalmanAngleMPU6050, colour = "Kalman MPU")) +
+      geom_line(data = dfData, aes(x=t, y=kalmanR, colour = "kalman R")) +
+      geom_line(data = dfData, aes(x=t, y=kalmanRCalc, colour = "Kalman R calc")) +
       ylab("Ángulo (º)") + xlab("t (ms)") +
       theme_bw()
   }
@@ -576,8 +536,8 @@ plotAnglesAGC_KmpuKcalc(theAxix="Y")
 
 
 ```{r}
-### cbind(ang$X, angXY.df$calcKalmanX, ang$X-angXY.df$calcKalmanX)
-### mean(ang$X-angXY.df$calcKalmanX)
+### cbind(kalmanR$X, angXY.df$calcKalmanX, kalmanR$X-angXY.df$calcKalmanX)
+### mean(kalmanR$X-angXY.df$calcKalmanX)
 ```
 
 

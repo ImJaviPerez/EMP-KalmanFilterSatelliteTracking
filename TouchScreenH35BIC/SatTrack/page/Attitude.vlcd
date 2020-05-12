@@ -14,23 +14,19 @@
 <text style = "fill:White; stroke:Transparent; font-family:; font-size:14pt" x = "185" y = "308" width = "53.22612" height = "23.46093" ShapeName = "Transparent" ShapeNum = "29" >North</text>
 <number style = "fill:White; stroke:RoyalBlue; font-family:; font-size:20pt" x = "220" y = "38" width = "24.16232" height = "33.51562" ShapeName = "Color" ShapeNum = "46" RadianNum = "0" >0</number>
 <number style = "fill:White; stroke:RoyalBlue; font-family:; font-size:20pt" x = "220" y = "74" width = "24.16232" height = "33.51562" ShapeName = "Color" ShapeNum = "47" RadianNum = "0" >0</number>
-<number style = "fill:White; stroke:RoyalBlue; font-family:; font-size:20pt" x = "40" y = "38" width = "24.16232" height = "33.51562" ShapeName = "Color" ShapeNum = "44" RadianNum = "0" >0</number>
-<number style = "fill:White; stroke:RoyalBlue; font-family:; font-size:20pt" x = "40" y = "74" width = "24.16232" height = "33.51562" ShapeName = "Color" ShapeNum = "45" RadianNum = "0" >0</number>
+<number style = "fill:White; stroke:RoyalBlue; font-family:; font-size:20pt" x = "35" y = "38" width = "24.16232" height = "33.51562" ShapeName = "Color" ShapeNum = "44" RadianNum = "0" >0</number>
+<number style = "fill:White; stroke:RoyalBlue; font-family:; font-size:20pt" x = "35" y = "74" width = "24.16232" height = "33.51562" ShapeName = "Color" ShapeNum = "45" RadianNum = "0" >0</number>
 <text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "111" y = "76" width = "77.8446" height = "23.46093" ShapeName = "Transparent" ShapeNum = "33" >Antenna</text>
 <text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "112" y = "39" width = "74.95528" height = "23.46093" ShapeName = "Transparent" ShapeNum = "32" >Satellite</text>
-<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "0" y = "435" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "25" >00</text>
-<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "0" y = "415" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "24" >00</text>
 <circleGauge x = "152" y = "133" width = "164" height = "164" ShapeName = "Red" ShapeNum = "21" StoreType = "Local" RadianNum = "0" Direction = "2/6 Width"
  xlink:href = "C:\Users\Javi\OneDrive\formacion\Master\TFM\code\TouchScreenH35B_IC\SatTrack\SatTrack\image\image041.bmp">
 </circleGauge>
-<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "90" y = "415" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "26" >00</text>
-<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "90" y = "435" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "27" >00</text>
-<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:10pt" x = "2" y = "462" width = "85.95485" height = "16.75781" ShapeName = "Transparent" ShapeNum = "40" >Vers. 1.01.13</text>
-<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "238" y = "385" width = "11.56337" height = "23.46093" ShapeName = "Transparent" ShapeNum = "43" >:</text>
-<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "205" y = "385" width = "11.56337" height = "23.46093" ShapeName = "Transparent" ShapeNum = "42" >:</text>
+<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:10pt" x = "2" y = "462" width = "85.95485" height = "16.75781" ShapeName = "Transparent" ShapeNum = "40" >Vers. 1.01.14</text>
+<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "239" y = "385" width = "11.56337" height = "23.46093" ShapeName = "Transparent" ShapeNum = "43" >:</text>
+<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "206" y = "385" width = "11.56337" height = "23.46093" ShapeName = "Transparent" ShapeNum = "42" >:</text>
 <text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "180" y = "385" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "48" >00</text>
 <text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "213" y = "385" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "49" >00</text>
-<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "246" y = "385" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "50" >00</text>
+<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "247" y = "385" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "50" >00</text>
 <rect style = "fill:none; stroke:Black; stroke-width:1" x = "152" y = "387" width = "19" height = "19" ShapeName = "Rectangle" ShapeNum = "51" />
-<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "154" y = "418" width = "128.148" height = "23.46093" ShapeName = "Color" ShapeNum = "41" >Satellite name</text>
+<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "80" y = "418" width = "128.148" height = "23.46093" ShapeName = "Color" ShapeNum = "41" >Satellite name</text>
 </vlcd>

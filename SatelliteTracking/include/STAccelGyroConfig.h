@@ -11,7 +11,7 @@ typedef enum
     ACC_GYRO_X_AXIS_LEFT = 90 , // X axis to left side
     ACC_GYRO_X_AXIS_BACKWARD = 180, // X axis to backward
     ACC_GYRO_X_AXIS_RIGHT = 270 // X axis to rigth side
-} gyroXposition;
+} accGyroXposition;
 
 
 
@@ -28,6 +28,11 @@ const double GYRO_SENSITIVITY_SCALE_FACTOR_0250 = 131.0;
 const double GYRO_SENSITIVITY_SCALE_FACTOR_0500 = 65.5;
 const double GYRO_SENSITIVITY_SCALE_FACTOR_1000 = 32.8;
 const double GYRO_SENSITIVITY_SCALE_FACTOR_2000 = 16.4;
+// Gyroscope Sensitivity Scale Factor (rad/s)
+const double GYRO_SENSITIVITY_SCALE_FACTOR_0250_RADS = GYRO_SENSITIVITY_SCALE_FACTOR_0250 * RAD_TO_DEG;
+const double GYRO_SENSITIVITY_SCALE_FACTOR_0500_RADS = GYRO_SENSITIVITY_SCALE_FACTOR_0500 * RAD_TO_DEG;
+const double GYRO_SENSITIVITY_SCALE_FACTOR_1000_RADS = GYRO_SENSITIVITY_SCALE_FACTOR_1000 * RAD_TO_DEG;
+const double GYRO_SENSITIVITY_SCALE_FACTOR_2000_RADS = GYRO_SENSITIVITY_SCALE_FACTOR_2000 * RAD_TO_DEG;
 
 // Accelerometer configuration constants
 // Accelerometer Sensitivity
@@ -36,8 +41,8 @@ const uint8_t ACC_FULL_SCALE_RANGE_04 = 0X01; // pm 4 g
 const uint8_t ACC_FULL_SCALE_RANGE_08 = 0X02; // pm 8 g
 const uint8_t ACC_FULL_SCALE_RANGE_16 = 0X03; // pm 16 g
 // Accelerometer Sensitivity Scale Factor (/g)
-const double ACC_SENSITIVITY_SCALE_FACTOR_02 = 16384;
-const double ACC_SENSITIVITY_SCALE_FACTOR_04 = 8192;
-const double ACC_SENSITIVITY_SCALE_FACTOR_08 = 4096;
-const double ACC_SENSITIVITY_SCALE_FACTOR_16 = 2084;
+const double ACC_SENSITIVITY_SCALE_FACTOR_02 = 16384.0L;
+const double ACC_SENSITIVITY_SCALE_FACTOR_04 = 8192.0L;
+const double ACC_SENSITIVITY_SCALE_FACTOR_08 = 4096.0L;
+const double ACC_SENSITIVITY_SCALE_FACTOR_16 = 2084.0L;
 #endif //ST_ACCELGYROCONFIG_H

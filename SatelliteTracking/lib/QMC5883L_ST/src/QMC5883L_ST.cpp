@@ -6,6 +6,7 @@
 #ifdef QMC5883L_ST_TRACE
   #include <Arduino.h>
 #endif
+#include <Arduino.h> // To use min()
 
 //using namespace SatTrack;
 
@@ -63,16 +64,55 @@
 #define M_PI 3.14159265358979323846264338327950288
 #endif
 
-// Constructor
+#define sdAngleAtanDiff1(y,x,sdY,sdX) (atan2(2.0*(y*sdX + x*sdY),(x*x + y*y - sdX*sdX - sdY*sdY)))
+#define sdAngleAtanDiff(y,x,sdY,sdX) (atan2((y + sdY),(x - sdX)) - atan2((y - sdY),(x + sdX)))
+
+/**
+ * @brief Construct a new qmc5883l st::qmc5883l st object
+ * Y axis points North direction
+ * X axis points East direction
+ * 
+ */
 QMC5883L_ST::QMC5883L_ST()
-{
-  QMC5883L_ST(COMPASS_X_AXIS_FORWARD);
+{ 
+  // These constants values are between (-32768, 32767).
+  // There are neither degrees nor radians
+  const float m_LOCAL_DECLINATION = -0.25 * DEG_TO_RAD; //0º15' = 0.25
+  const float m_LOCAL_INCLINATION = 58.4764 * DEG_TO_RAD; //58º28'35''
+  const float m_SD_COMPASS_X = 11.369459546F;
+  const float m_SD_COMPASS_Y = 12.118513032F;
+  const float m_SD_COMPASS_Z = 13.846676811F;
+  
+  QMC5883L_ST(COMPASS_X_AXIS_FORWARD, m_LOCAL_DECLINATION, m_LOCAL_INCLINATION, m_SD_COMPASS_X, m_SD_COMPASS_Y, m_SD_COMPASS_Z);
 }
-// Constructor
-QMC5883L_ST::QMC5883L_ST(compassXposition compassXposition)
+
+
+/**
+ * @brief Construct a new qmc5883l st::qmc5883l st object
+ * Y axis points North direction
+ * X axis points East direction
+ * 
+ * @param compassXposition 
+ * @param localDeclination in radians
+ * @param localInclination in radians
+ * @param sdX 
+ * @param sdY 
+ * @param sdZ 
+ */
+QMC5883L_ST::QMC5883L_ST(compassXposition compassXposition, float localDeclination, float localInclination, float sdX, float sdY, float sdZ)
 {
   m_xAngleOffset = compassXposition;
-  // m_localDeclitation = localDeclination;
+
+  m_localDeclination = localDeclination;
+  m_localInclination = localInclination;
+  //Bilbao: m_localRollX = -58.48º, m_localPitchY = -179.85º, m_localYawZ = 90.25
+  m_localRollX = atan2(sin(m_localInclination), (cos(m_localInclination)*cos(m_localDeclination)));
+  m_localPitchY = atan2((cos(m_localInclination)*sin(m_localDeclination)), sin(m_localInclination));
+  m_localYawZ = M_PI_2 - m_localDeclination;
+
+  m_sdCompassX = sdX;
+  m_sdCompassY = sdY;
+  m_sdCompassZ = sdZ;
 }
 
 QMC5883L_ST::~QMC5883L_ST()
@@ -203,8 +243,6 @@ int QMC5883L_ST::ready()
   return status & QMC5883L_STATUS_DRDY; 
 }
 
-// Do not use variable t
-// int QMC5883L_ST::readRaw( int16_t *x, int16_t *y, int16_t *z, int16_t *t )
 /**
  * @brief 
  * 
@@ -213,14 +251,14 @@ int QMC5883L_ST::ready()
  * @param z 
  * @return int 
  */
-int QMC5883L_ST::readRaw( int16_t *x, int16_t *y, int16_t *z, bool scaled)
+int QMC5883L_ST::m_readRaw( int16_t *x, int16_t *y, int16_t *z, bool scaled)
 {
   #ifdef QMC5883L_ST_TRACE
     ////int resultReady = ;
     int auxCounter = 0;
     while (!ready())
     {
-      Serial.print("QMC5883L_ST::readRaw(). Not ready ");
+      Serial.print("QMC5883L_ST::m_readRaw(). Not ready ");
       Serial.print(++auxCounter);
     }
   #else
@@ -233,13 +271,32 @@ int QMC5883L_ST::readRaw( int16_t *x, int16_t *y, int16_t *z, bool scaled)
   *y = Wire.read() | (Wire.read()<<8);
   *z = Wire.read() | (Wire.read()<<8);
 
+  // Save new values
+  m_compassX = *x;
+  m_compassY = *y;
+  m_compassZ = *z;
+
   // imjaviperez
   if (scaled)
   {
-    scaleValues(*x,*y,*z);
+    m_scaleValues(*x,*y,*z);
   }
   return 1;
 }
+
+bool QMC5883L_ST::readRawRotated( int16_t &x, int16_t &y, int16_t &z)
+{
+  int valuesRead = m_readRaw(&x, &y, &z, false);
+  m_rotateRawValues();
+  x = m_compassX;
+  y = m_compassY;
+  z = m_compassZ;
+
+  m_calculateVarAngles();
+
+  return (valuesRead);
+}
+
 
 /**
  * @brief There could happen that:
@@ -257,39 +314,18 @@ int QMC5883L_ST::readRaw( int16_t *x, int16_t *y, int16_t *z, bool scaled)
  * @return int 1 if values have been scaled. 
  * @return int 0 if values have not been scaled. 
  */
-void QMC5883L_ST::scaleValues(int16_t &x, int16_t &y, int16_t &z)
+void QMC5883L_ST::m_scaleValues(int16_t &x, int16_t &y, int16_t &z)
 {
   /* Update the observed boundaries of the measurements */
   if(x<xlow) xlow = x;
   if(x>xhigh) xhigh = x;
   if(y<ylow) ylow = y;
   if(y>yhigh) yhigh = y;
-  /*
-  // To accelerate the adjustament process we can compare X and Y axes
-  if (xlow < ylow)
-  {
-    ylow = xlow;
-  }
-  else
-  {
-    xlow = ylow;
-  }
-
-  if (xhigh > yhigh)
-  {
-    yhigh = xhigh;
-  }
-  else
-  {
-    xhigh = yhigh;
-  }
-  */
-
   if(z<zlow) zlow = z;
   if(z>zhigh) zhigh = z;
 
   /* Bail out if not enough data is available. */
-  if( xlow==xhigh || ylow==yhigh || zlow==zhigh ) return 0;
+  if( xlow==xhigh || ylow==yhigh || zlow==zhigh ) return;
 
   /* Recenter the measurement by subtracting the average */
   x -= (xhigh+xlow)/2;
@@ -313,57 +349,6 @@ void QMC5883L_ST::scaleValues(int16_t &x, int16_t &y, int16_t &z)
   //// return 1;
 }
 
-/**
- * @brief It returns magnetometer raw values but this time
- * (rx,ry,rz) will be as if magnetomer is placed with X axis forward.
- * rx will be a virtual forward axis and
- * ry will be a virtual left axis.
- * rz is a real upward axis.
- * 
- * @author imjaviperez
- * @param rx 
- * @param ry 
- * @param rz 
- * @return true if returned values are right.
- * @return false if returned values are wrong.
- */
-/*
-bool QMC5883L_ST::readRotated(int16_t &rx, int16_t &ry, int16_t &rz)
-{
-  if (!readRaw(&rx,&ry,&rz,true))
-  {
-    #ifdef QMC5883L_ST_TRACE
-      Serial.println("readRotated() ERROR readRaw");
-    #endif
-    return false;
-  } 
-  
-  // Rotate X and Y angles
-  if (m_xAngleOffset == COMPASS_X_AXIS_FORWARD) // 0
-  {
-    // Do not do anything
-  }
-  else if (m_xAngleOffset == COMPASS_X_AXIS_LEFT) //90
-  {
-    int16_t tmpX = rx;
-    rx = -ry;
-    ry = tmpX;
-  }
-  else if (m_xAngleOffset == COMPASS_X_AXIS_BACKWARD) // 180
-  {
-    rx = -rx;
-    ry = -ry;
-  }
-  else if (m_xAngleOffset == COMPASS_X_AXIS_RIGHT) // 270
-  {
-    int16_t tmpX = rx;
-    rx = -ry;
-    ry = tmpX;
-  }
-
-  return true;
-}
-*/
 
 /**
  * @brief It returns (rx,ry,rz) but there will be as if 
@@ -377,7 +362,7 @@ bool QMC5883L_ST::readRotated(int16_t &rx, int16_t &ry, int16_t &rz)
  * @param ry 
  * @param rz 
  */
-void QMC5883L_ST::rotateAngles(int16_t &rx, int16_t &ry, int16_t &rz)
+inline void QMC5883L_ST::m_rotateRawValues()
 {
   // Rotate X and Y angles
   if (m_xAngleOffset == COMPASS_X_AXIS_FORWARD) // 0
@@ -386,20 +371,20 @@ void QMC5883L_ST::rotateAngles(int16_t &rx, int16_t &ry, int16_t &rz)
   }
   else if (m_xAngleOffset == COMPASS_X_AXIS_LEFT) //90
   {
-    int16_t tmpX = rx;
-    rx = -ry;
-    ry = tmpX;
+    int16_t tmpX = m_compassX;
+    m_compassX = -m_compassY;
+    m_compassY = tmpX;
   }
   else if (m_xAngleOffset == COMPASS_X_AXIS_BACKWARD) // 180
   {
-    rx = -rx;
-    ry = -ry;
+    m_compassX = -m_compassX;
+    m_compassY = -m_compassY;
   }
   else if (m_xAngleOffset == COMPASS_X_AXIS_RIGHT) // 270
   {
-    int16_t tmpX = rx;
-    rx = -ry;
-    ry = tmpX;
+    int16_t tmpX = m_compassX;
+    m_compassX = m_compassY;
+    m_compassY = -tmpX;
   }
 
 }
@@ -417,27 +402,32 @@ void QMC5883L_ST::rotateAngles(int16_t &rx, int16_t &ry, int16_t &rz)
  * @return true : if returned values are right.
  * @return false : false if returned values are wrong.
  */
-bool QMC5883L_ST::m_readNormalized(double &nx, double &ny, double &nz, bool rotated)
+bool QMC5883L_ST::m_readRawNormalized(double &nx, double &ny, double &nz, bool rotated)
 {
   int16_t bx, by, bz;
-  if (!readRaw(&bx,&by,&bz,true))
+  if (!m_readRaw(&bx,&by,&bz,true))
   {
     #ifdef QMC5883L_ST_TRACE
-      Serial.println("m_readNormalized() ERROR readRaw");
+      Serial.println("m_readRawNormalized() ERROR m_readRaw");
     #endif
     return false;
   } 
 
   if (rotated)
   {
-    rotateAngles(bx,by,bz);
+    m_rotateRawValues();
   }
+  bx = m_compassX;
+  by = m_compassY;
+  bz = m_compassZ;
+
+  m_calculateVarAngles();
 
   // Normalize magnetometer readings
   if((bx == 0) && (by ==0 ) && (bz == 0))
   {
     #ifdef QMC5883L_ST_TRACE
-      Serial.println("readNormalized() ERROR values");
+      Serial.println("readRawNormalized() ERROR values");
     #endif
     return false;
   } 
@@ -454,21 +444,6 @@ bool QMC5883L_ST::m_readNormalized(double &nx, double &ny, double &nz, bool rota
   return true;  
 }
 
-/**
- * @brief It returns normalized magnetometer values
- * 
- * @author imjaviperez
- * @param nx 
- * @param ny 
- * @param nz 
- * @return true : if returned values are right.
- * @return false : false if returned values are wrong.
- */
-bool QMC5883L_ST::readNormalized(double &nx, double &ny, double &nz)
-{
-  return m_readNormalized(nx,ny,nz,false);
-}
-
 
 /**
  * @brief It returns magnetometer normalized values but this time
@@ -483,9 +458,9 @@ bool QMC5883L_ST::readNormalized(double &nx, double &ny, double &nz)
  * @return true : if returned values are right.
  * @return false : false if returned values are wrong.
  */
-bool QMC5883L_ST::readNormalizedRotated(double &rnx, double &rny, double &rnz)
+bool QMC5883L_ST::readRawNormalizedRotated(double &rnx, double &rny, double &rnz)
 {
-  return m_readNormalized(rnx,rny,rnz,true);
+  return m_readRawNormalized(rnx,rny,rnz,true);
 }
 
 void QMC5883L_ST::resetCalibration() {
@@ -494,12 +469,16 @@ void QMC5883L_ST::resetCalibration() {
   zhigh = zlow = 0;
 }
 
-int QMC5883L_ST::readHeading()
+/**
+ * @brief 
+ * 
+ * @return float Compass North heading in radians
+ */
+float QMC5883L_ST::readHeading()
 {
   int16_t x, y, z; //, t;
 
-  //// if(!readRaw(&x,&y,&z,&t)) return 0;
-  if(!readRaw(&x,&y,&z,true)) return 0;
+  if(!readRawRotated(x,y,z))  return 0;
 
   /* Update the observed boundaries of the measurements */
   if(x<xlow) xlow = x;
@@ -518,15 +497,35 @@ int QMC5883L_ST::readHeading()
   float fx = (float)x/(xhigh-xlow);
   float fy = (float)y/(yhigh-ylow);
 
-  int heading = 180.0*atan2(fy,fx)/M_PI;
-  // if(heading<=0) heading += 360;
-  // 
-  // Offset correction to show
-  // heading -= m_xAngleOffset;
-  // if(heading<=0) heading += 360;
+  int heading = atan2(fy,fx);
 
   return heading;
 }
+
+
+/**
+ * @brief Calculates variance angles roll X, pitch Y and yaw Z
+ * in (radians)^2
+ * 
+ */
+inline void QMC5883L_ST::m_calculateVarAngles()
+{
+  // Calculate standard deviation
+  double sigmaCompassEast =  sdAngleAtanDiff(m_compassZ, m_compassY, m_sdCompassZ, m_sdCompassY);
+  double sigmaCompassNorth = sdAngleAtanDiff(m_compassX, m_compassZ, m_sdCompassX, m_sdCompassZ);
+  double sigmaCompassZ =     sdAngleAtanDiff(m_compassY, m_compassX, m_sdCompassY, m_sdCompassX);
+
+  // SD angle is between [0, 2*PI]
+  sigmaCompassEast = min(abs(sigmaCompassEast), 2*M_PI);
+  sigmaCompassNorth = min(abs(sigmaCompassNorth), 2*M_PI);
+  sigmaCompassZ = min(abs(sigmaCompassZ), 2*M_PI);
+
+  // Calculate variance
+  m_varAngleX = (float) sigmaCompassEast * sigmaCompassEast;
+  m_varAngleY = (float) sigmaCompassNorth * sigmaCompassNorth;
+  m_varAngleZ = (float) sigmaCompassZ * sigmaCompassZ;
+}
+
 
 /**
  * @brief This member function gets rotation angles around
@@ -538,6 +537,9 @@ int QMC5883L_ST::readHeading()
  * Y will be a virtual left axis.
  * Z is a real upward axis.
  * 
+ * Every returned angle is related to Geographical North
+ * coordinates system (not from Magnetic North coord. syst.)
+ * 
  * @param rollX 
  * @param pitchY 
  * @param yawZ 
@@ -545,24 +547,31 @@ int QMC5883L_ST::readHeading()
  * @return true 
  * @return false 
  */
-bool QMC5883L_ST::m_readAngles(int16_t &rollX,int16_t &pitchY,int16_t &yawZ, bool rotated)
+bool QMC5883L_ST::m_readAngles(float &rollX,float &pitchY,float &yawZ, bool rotated)
 {
   int16_t x, y, z;
 
-  if(!readRaw(&x,&y,&z,true)) return false;
+  if(!m_readRaw(&x,&y,&z,false)) return false;
 
   if (rotated)
   {
-    rotateAngles(x,y,z);
+    m_rotateRawValues();
   }
+  // Calculate variance after reading and ratating angles
+  m_calculateVarAngles();
 
-  rollX = (180.0 * atan2(z,y) / M_PI);
-  pitchY = (180.0 * atan2(x,z) / M_PI);
-  yawZ = (180.0 * atan2(y,x) / M_PI);
+  //// x = m_compassX;
+  //// y = m_compassY;
+  //// z = m_compassZ;
 
-  // if (rollX < 0) rollX += 360;
-  // if (pitchY < 0) pitchY += 360;
-  // if (yawZ < 0) yawZ += 360;
+  // Save rotation values in private local members
+  m_rollX  = atan2(m_compassZ,m_compassY);/// - m_localRollX;
+  m_pitchY = atan2(m_compassX,m_compassZ);/// - m_localPitchY;
+  m_yawZ   = atan2(m_compassY,m_compassX);/// - m_localYawZ;
+  // Copy values to return them
+  rollX = m_rollX;
+  pitchY = m_pitchY;
+  yawZ = m_yawZ;
 
   return true;
 }
@@ -578,14 +587,96 @@ bool QMC5883L_ST::m_readAngles(int16_t &rollX,int16_t &pitchY,int16_t &yawZ, boo
  * @return true : it has rigth rotation angles.
  * @return false : if can not read any value.
  */
-bool QMC5883L_ST::readRawAngles(int16_t &rollX,int16_t &pitchY,int16_t &yawZ)
+bool QMC5883L_ST::readAngles(float &rollX,float &pitchY,float &yawZ)
 {
   return m_readAngles(rollX,pitchY,yawZ, false);
 }
 
-bool QMC5883L_ST::readRotatedAngles(int16_t &rollX,int16_t &pitchY,int16_t &yawZ)
+/**
+ * @brief Asks magnetometer for new values of rollX, pitchY and yawZ
+ * 
+ * @param rollX Magnetometer roll angle. This variable is modified by the function.
+ * @param pitchY Magnetometer pitch angle. This variable is modified by the function.
+ * @param yawZ Magnetometer yaw angle. This variable is modified by the function.
+ * @return true when reading values
+ * @return false if there is no new values
+ */
+bool QMC5883L_ST::readRotatedAngles(float &rollX,float &pitchY,float &yawZ)
 {
   return m_readAngles(rollX,pitchY,yawZ, true);
+}
+
+/**
+ * @brief Returns magnetometer X axis raw value.
+ * This value have been rotated yet, 
+ * i.e.: the returned value is as if magnetometer had X axis forward.
+ * 
+ * @return int16_t 
+ */
+int16_t QMC5883L_ST::rawValueX()
+{
+  return m_compassX;
+}
+
+/**
+ * @brief Returns magnetometer Y axis raw value.
+ * This value have been rotated yet, 
+ * i.e.: the returned value is as if magnetometer 
+ * had X axis forward and Y axis left.
+ * 
+ * @return int16_t 
+ */
+int16_t QMC5883L_ST::rawValueY()
+{
+  return m_compassY;
+}
+
+/**
+ * @brief Returns magnetometer Z axis raw value.
+ * This value have been rotated yet, 
+ * i.e.: the returned value is as if magnetometer had 
+ * had X axis forward, Y axis left and Z axis upward direction
+ * 
+ * @return int16_t 
+ */
+int16_t QMC5883L_ST::rawValueZ()
+{
+  return m_compassZ;
+}
+
+/**
+ * @brief Returns magnetometer rollX angle not asking again
+ *  to the device. It sends last saved value
+ * 
+ * @return float 
+ */
+float QMC5883L_ST::rollX()
+{
+  return m_rollX;
+}
+
+
+/**
+ * @brief Returns magnetometer pitchY angle not asking again
+ *  to the device. It sends last saved value
+ * 
+ * @return float 
+ */
+float QMC5883L_ST::pitchY()
+{
+  return m_pitchY;
+}
+
+
+/**
+ * @brief Returns magnetometer yawZ angle not asking again
+ *  to the device. It sends last saved value
+ * 
+ * @return float 
+ */
+float QMC5883L_ST::yawZ()
+{
+  return m_yawZ;
 }
 
 /**
@@ -594,7 +685,31 @@ bool QMC5883L_ST::readRotatedAngles(int16_t &rollX,int16_t &pitchY,int16_t &yawZ
  * 
  * @return int 
  */
-compassXposition QMC5883L_ST::offSetAngle()
+compassXposition QMC5883L_ST::offsetAngle()
 {
   return m_xAngleOffset;
+}
+
+
+/**
+ * @brief Returns compass variance angles.
+ * It overwrites parameters.
+ * 
+ * @param varRollX : variance of roll angle (angle around X axis)
+ * @param varPitchY : variance of pitch angle (angle around Y axis)
+ * @param varYawZ : variance of roll yaw (angle around Z axis)
+ */
+void QMC5883L_ST::getVarianceAngle(float &varRollX, float &varPitchY, float &varYawZ)
+{
+  varRollX = m_varAngleX;
+  varPitchY = m_varAngleY;
+  varYawZ = m_varAngleZ;
+}
+
+
+void QMC5883L_ST::getLocalAngles(float &localRollX, float &localPitchY, float &localYawZ)
+{
+  localRollX = m_localRollX;
+  localPitchY = m_localPitchY;
+  localYawZ = m_localYawZ;
 }

@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"name": "SatelliteTracking",
+			"path": "."
+		},
+		{
+			"path": "../esp8266_get_file"
+		}
+	],
+	"settings": {
+		"terminal.integrated.env.windows": {
+			"PATH": "C:\\Users\\Javi\\.platformio\\penv\\Scripts;C:\\Users\\Javi\\.platformio\\penv;C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath;C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio1261\\opl\\bin\\x64_win64;C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio1261\\opl\\oplide\\;C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio1261\\cplex\\bin\\x64_win64;C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio1261\\cpoptimizer\\bin\\x64_win64;C:\\Program Files\\Common Files\\Microsoft Shared\\Windows Live;C:\\Program Files (x86)\\Common Files\\Microsoft Shared\\Windows Live;C:\\ProgramData\\Oracle\\Java\\javapath;C:\\Program Files\\Java\\jdk1.8.0_05\\bin;C:\\Program Files\\ImageMagick-6.8.8-Q16;C:\\Program Files (x86)\\AMD APP\\bin\\x86_64;C:\\Program Files (x86)\\AMD APP\\bin\\x86;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files (x86)\\ATI Technologies\\ATI.ACE\\Core-Static;C:\\Program Files\\Calibre2\\;C:\\Program Files (x86)\\Common Files\\lenovo\\easyplussdk\\bin;C:\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin;C:\\cygwin64\\bin;C:\\Program Files (x86)\\Windows Live\\Shared;C:\\Program Files\\MATLAB\\R2018a\\runtime\\win64;C:\\Program Files\\MATLAB\\R2018a\\bin;C:\\LINGO64_16\\;C:\\Program Files\\AutoFirma\\AutoFirma;C:\\Program Files\\Git\\cmd;C:\\Users\\Javi\\AppData\\Local\\Programs\\MiKTeX 2.9\\miktex\\bin\\x64\\;C:\\Users\\Javi\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath;C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio1261\\opl\\bin\\x64_win64;C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio1261\\opl\\oplide\\;C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio1261\\cplex\\bin\\x64_win64;C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio1261\\cpoptimizer\\bin\\x64_win64;C:\\Program Files\\Common Files\\Microsoft Shared\\Windows Live;C:\\Program Files (x86)\\Common Files\\Microsoft Shared\\Windows Live;C:\\ProgramData\\Oracle\\Java\\javapath;C:\\Program Files\\Java\\jdk1.8.0_05\\bin;C:\\Program Files\\ImageMagick-6.8.8-Q16;C:\\Program Files (x86)\\AMD APP\\bin\\x86_64;C:\\Program Files (x86)\\AMD APP\\bin\\x86;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files (x86)\\ATI Technologies\\ATI.ACE\\Core-Static;C:\\Program Files\\Calibre2\\;C:\\Program Files (x86)\\Common Files\\lenovo\\easyplussdk\\bin;C:\\mingw-w64\\x86_64-8.1.0-win32-seh-rt_v6-rev0\\mingw64\\bin;C:\\cygwin64\\bin;C:\\Program Files (x86)\\Windows Live\\Shared;C:\\Program Files\\MATLAB\\R2018a\\runtime\\win64;C:\\Program Files\\MATLAB\\R2018a\\bin;C:\\LINGO64_16\\;C:\\Program Files\\AutoFirma\\AutoFirma;C:\\Program Files\\Git\\cmd;C:\\Users\\Javi\\AppData\\Local\\Programs\\MiKTeX 2.9\\miktex\\bin\\x64\\;C:\\Users\\Javi\\AppData\\Local\\Programs\\Microsoft VS Code\\bin",
+			"PLATFORMIO_CALLER": "vscode"
+		},
+		"files.associations": {
+			"*.tcc": "cpp"
+		}
+	}
+}

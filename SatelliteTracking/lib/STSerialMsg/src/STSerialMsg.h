@@ -22,13 +22,13 @@ namespace SatTrack
         // Return OK
         const int OK_ST_SERIAL = 1;
         // MEGA2560 serial communication baud rate
-        static const unsigned long MEGA_BAUD_RATE = 115200;
+        static const unsigned long MEGA_BAUD_RATE = 115200L;
         // ESP8266 serial communication baud rate
-        static const unsigned long ESP_BAUD_RATE = 115200;
+        static const unsigned long ESP_BAUD_RATE = 115200L;
         // Serial port communication baud rate. To show traces
-        static const unsigned long DBG_BAUD_RATE = 115200;
+        static const unsigned long DBG_BAUD_RATE = 115200L;
         // GPS 6MV2 serial communication baud rate
-        static const unsigned long GPS_BAUD_RATE = 9600;
+        static const unsigned long GPS_BAUD_RATE = 9600L;
 
         
         // Number of Serial port to use

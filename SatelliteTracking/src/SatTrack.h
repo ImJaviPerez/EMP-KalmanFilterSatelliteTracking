@@ -5,10 +5,12 @@
 #define THIS_PROJECT_HAS_ACCEL_GYRO
 #define THIS_PROJECT_HAS_COMPASS
 
+#define sdAngleAtanDiff1(y,x,sdY,sdX) (atan2(2.0*(y*sdX + x*sdY),(x*x + y*y - sdX*sdX - sdY*sdY)))
+#define sdAngleAtanDiff(y,x,sdY,sdX) (atan2((y + sdY),(x - sdX)) - atan2((y - sdY),(x + sdX)))
 
 // Constants for smart delay sampling ====================
 // Period of time to get info from any device
-const unsigned long TIME_PERIOD_GPS_DT = 3000; // milliseconds
+const unsigned long TIME_PERIOD_GPS_DT = 10000; //3000; // milliseconds
 const unsigned long GPS_TIME_PERIOD = 50; // milliseconds
 const unsigned long COMPASS_TIME_PERIOD = 35; // milliseconds
 const unsigned long ANGLES_TIME_PERIOD = 30; // milliseconds
@@ -16,6 +18,8 @@ const unsigned long SAT_ATTITUDE_TIME_PERIOD = 40; // milliseconds
 const unsigned long SAT_LCD_TIME_PERIOD = 200; // milliseconds
 const unsigned long COMPASS_SAMPLING_RATE = 50; // milliseconds
 
+// 3 * PI / 2
+const float M_3_PI_2 = M_PI + M_PI_2;
 
 // ----------------------------------------------------
 // Forward declarations -------------------------------
@@ -29,22 +33,23 @@ inline void showTraceInfo();
 
 inline void getGPSInfo();
 inline void getSatelliteAttitude();
+// TO-DO : Create a new class with Accelerometer-Gyroscope member functions
 inline void transformAccelGyroInfo2Angles();
 inline void getAccGyroDeviceInfo();
+inline void getAccVarAngles();
+inline void getGyroVariance();
 inline void calculateRotationAngles();
 inline void horizontalHeading();
-// positiveAngle(angleValue): Returns a Positive Angle  between [0º, 360º]
-#define positiveAngle(angleValue) ((angleValue)<(0)?(angleValue += 360):((angleValue)>(360)?(angleValue -= 360):(angleValue)))
-/*
-  if (angleValue < 0) 
-    angleValue += 360;
-  else if (angleValue > 360) 
-    angleValue -= 360;
-  
-  return angleValue;
-*/
-// angle_pm180(angleValue): Returns an angle between [-180º, 180º]
-#define angle_pm180(angleValue) ((angleValue)<(-180)?(angleValue += 360):((angleValue)>(180)?(angleValue -= 360):(angleValue)))
+float getPositiveAngle(float angle);
+
+// positiveAngleDegrees(angleValue): Returns a Positive Angle  between [0º, 360º]
+#define positiveAngleDegrees(angleValue) ((angleValue)<(0)?(angleValue += 360):((angleValue)>(360)?(angleValue -= 360):(angleValue)))
+// positiveAngle(angleValue): Returns a Positive Angle  between [0, 2.0F*M_PI]
+#define positiveAngle(angleValue) ((angleValue)<(0)?(angleValue += 2.0F*M_PI):((angleValue)>(2.0F*M_PI)?(angleValue -= 2.0F*M_PI):(angleValue)))
+// angle_pm180Degrees(angleValue): Returns an angle between [-180º, 180º]
+#define angle_pm180Degrees(angleValue) ((angleValue)<(-180)?(angleValue += 360):((angleValue)>(180)?(angleValue -= 360):(angleValue)))
+// angle_pm180Radians(angleValue): Returns an angle between [-M_PI, M_PI]
+#define angle_pm180Radians(angleValue) ((angleValue)<(-M_PI)?(angleValue += M_PI):((angleValue)>(M_PI)?(angleValue -= M_PI):(angleValue)))
 
 
 // LCD Forward declarations

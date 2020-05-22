@@ -31,10 +31,10 @@
 #define ATT_LABEL_TEST_03               26
 #define ATT_LABEL_TEST_04               27
 #define ATT_HEADING                     28
-#define ATT_NUMBER_AZIMUT_SATELLITE     44
-#define ATT_NUMBER_AZIMUT_ANTENNA       45
-#define ATT_NUMBER_ASCENSION_SATELLITE  46
-#define ATT_NUMBER_ASCENSION_ANTENNA    47
+#define ATT_NUMBER_ELEVATION_SATELLITE     44
+#define ATT_NUMBER_ELEVATION_ANTENNA       45
+#define ATT_NUMBER_AZIMUT_SATELLITE  46
+#define ATT_NUMBER_AZIMUT_ANTENNA    47
 #define ATT_LABEL_SAT_NAME              41
 #define ATT_NUMBER_HH                   48
 #define ATT_NUMBER_MM                   49

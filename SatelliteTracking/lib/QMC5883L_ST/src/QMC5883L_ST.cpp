@@ -515,6 +515,9 @@ inline void QMC5883L_ST::m_calculateVarAngles()
   double sigmaCompassNorth = sdAngleAtanDiff(m_compassX, m_compassZ, m_sdCompassX, m_sdCompassZ);
   double sigmaCompassZ =     sdAngleAtanDiff(m_compassY, m_compassX, m_sdCompassY, m_sdCompassX);
 
+  // Order compass measures
+  //qsort();
+
   // SD angle is between [0, 2*PI]
   sigmaCompassEast = min(abs(sigmaCompassEast), 2*M_PI);
   sigmaCompassNorth = min(abs(sigmaCompassNorth), 2*M_PI);
@@ -560,14 +563,11 @@ bool QMC5883L_ST::m_readAngles(float &rollX,float &pitchY,float &yawZ, bool rota
   // Calculate variance after reading and ratating angles
   m_calculateVarAngles();
 
-  //// x = m_compassX;
-  //// y = m_compassY;
-  //// z = m_compassZ;
-
   // Save rotation values in private local members
-  m_rollX  = atan2(m_compassZ,m_compassY);/// - m_localRollX;
-  m_pitchY = atan2(m_compassX,m_compassZ);/// - m_localPitchY;
-  m_yawZ   = atan2(m_compassY,m_compassX);/// - m_localYawZ;
+  m_rollX  = atan2(m_compassZ,m_compassY); // - m_localRollX;
+  m_pitchY = atan2(m_compassX,m_compassZ); // - m_localPitchY;
+  m_yawZ   = atan2(m_compassY,m_compassX); // - m_localYawZ;
+  
   // Copy values to return them
   rollX = m_rollX;
   pitchY = m_pitchY;

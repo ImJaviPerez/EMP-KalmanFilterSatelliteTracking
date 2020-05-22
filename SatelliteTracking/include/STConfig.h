@@ -37,13 +37,13 @@ namespace SatTrack
     const accGyroXposition ACC_GYRO_X_AXIS_POSITION = ACC_GYRO_X_AXIS_LEFT;
     //
     // Accelerometer raw values standard deviation
-    const float ACC_SD_X = 25.0F; //35.0F; //25.0F; //20.0F; //12.29109F; //6.0F; //12.29109F; //16.38812F; //25.0F; //49.164355950F;
-    const float ACC_SD_Y = 25.0F; //35.0F; //25.0F; //20.0F; //13.96672F; //6.0F; //13.96672F; //18.62230F; //26.0F; //55.866890392F;
-    const float ACC_SD_Z = 41.0F; //55.0F; //41.0F; //35.0F; //20.56029F; //6.0F; //20.56029F; //27.41372F; //41.0F; //82.241174857F;
+    const float ACC_SD_X = 12.0F; //25.0F; //35.0F; //25.0F; //20.0F; //12.29109F; //6.0F; //12.29109F; //16.38812F; //25.0F; //49.164355950F;
+    const float ACC_SD_Y = 12.0F; //25.0F; //35.0F; //25.0F; //20.0F; //13.96672F; //6.0F; //13.96672F; //18.62230F; //26.0F; //55.866890392F;
+    const float ACC_SD_Z = 20.0F; //41.0F; //55.0F; //41.0F; //35.0F; //20.56029F; //6.0F; //20.56029F; //27.41372F; //41.0F; //82.241174857F;
     // Gyroscope standard deviation (rad/sec)
-    const float GYRO_SD_X = 0.0006F; //0.0010465581F; //0.002093116F; //0.0010465581F; //0.02691271F;
-    const float GYRO_SD_Y = 0.0006F; //0.0008671617F; //0.001734323F; //0.0008671617F; //0.01265696F;
-    const float GYRO_SD_Z = 0.0006F; //0.0008187369F; //0.001637474F; //0.0008187369F; //0.01905207F;
+    const float GYRO_SD_X = 0.005F; //0.002F; //0.005F; //0.001F; //0.0006F; //0.0010465581F; //0.002093116F; //0.0010465581F; //0.02691271F;
+    const float GYRO_SD_Y = 0.005F; //0.002F; //0.005F; //0.001F; //0.0006F; //0.0008671617F; //0.001734323F; //0.0008671617F; //0.01265696F;
+    const float GYRO_SD_Z = 0.005F; //0.002F; //0.005F; //0.001F; //0.0006F; //0.0008187369F; //0.001637474F; //0.0008187369F; //0.01905207F;
     // ---------------------------------------------------------
     #endif
 
@@ -54,9 +54,9 @@ namespace SatTrack
     const compassXposition COMPASS_X_AXIS_POSITION = COMPASS_X_AXIS_BACKWARD;
     //
     // Magnetometer X, Y an Z raw values standard deviation configuration
-    const float COMPASS_SD_X = 8.0F; //11.0F;// 20.0F; //11.369459546F; //5.6847297729F; //11.369459546F;
-    const float COMPASS_SD_Y = 8.0F; //11.0F;// 20.0F; //12.118513032F; //6.0592565162F; //12.118513032F;
-    const float COMPASS_SD_Z = 9.0F; //13.0F;// 6.0F; //13.846676811F; //6.9233384053F; //13.846676811F;
+    const float COMPASS_SD_X = 10.0F; //14.0F;//8.0F; //11.0F;// 20.0F; //11.369459546F; //5.6847297729F; //11.369459546F;
+    const float COMPASS_SD_Y = 14.0F; //14.0F;//8.0F; //11.0F;// 20.0F; //12.118513032F; //6.0592565162F; //12.118513032F;
+    const float COMPASS_SD_Z = 14.0F; //16.0F;//9.0F; //13.0F;// 6.0F; //13.846676811F; //6.9233384053F; //13.846676811F;
 
     // Magnetometer interruption pin number
     const byte compassInterruptionPin = 2;

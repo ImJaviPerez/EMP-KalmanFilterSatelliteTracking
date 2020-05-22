@@ -5,12 +5,14 @@
 #define THIS_PROJECT_HAS_ACCEL_GYRO
 #define THIS_PROJECT_HAS_COMPASS
 
+#define SIMULATE_GPS  true
+
 #define sdAngleAtanDiff1(y,x,sdY,sdX) (atan2(2.0*(y*sdX + x*sdY),(x*x + y*y - sdX*sdX - sdY*sdY)))
 #define sdAngleAtanDiff(y,x,sdY,sdX) (atan2((y + sdY),(x - sdX)) - atan2((y - sdY),(x + sdX)))
 
 // Constants for smart delay sampling ====================
 // Period of time to get info from any device
-const unsigned long TIME_PERIOD_GPS_DT = 10000; //3000; // milliseconds
+const unsigned long TIME_PERIOD_GPS_DT = 1400; //10000; //3000; // milliseconds
 const unsigned long GPS_TIME_PERIOD = 50; // milliseconds
 const unsigned long COMPASS_TIME_PERIOD = 35; // milliseconds
 const unsigned long ANGLES_TIME_PERIOD = 30; // milliseconds
@@ -50,6 +52,7 @@ float getPositiveAngle(float angle);
 #define angle_pm180Degrees(angleValue) ((angleValue)<(-180)?(angleValue += 360):((angleValue)>(180)?(angleValue -= 360):(angleValue)))
 // angle_pm180Radians(angleValue): Returns an angle between [-M_PI, M_PI]
 #define angle_pm180Radians(angleValue) ((angleValue)<(-M_PI)?(angleValue += M_PI):((angleValue)>(M_PI)?(angleValue -= M_PI):(angleValue)))
+#define angle_90Degrees(angleValue) ((angleValue)<(0)?(angleValue = 0):((angleValue)>(90)?(angleValue = 90):(angleValue)))
 
 
 // LCD Forward declarations

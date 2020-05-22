@@ -6,8 +6,8 @@
  ShapeNum = "36" xlink:href = "C:\Users\Javi\OneDrive\formacion\Master\TFM\code\TouchScreenH35B_IC\SatTrack\SatTrack\image\image012.bmp">
 </image>
 <rect style = "fill:none; stroke:Red; stroke-width:1" x = "10" y = "33" width = "300" height = "38" ShapeName = "Rectangle" ShapeNum = "37" />
-<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "25" y = "2" width = "65.0933" height = "23.46093" ShapeName = "Transparent" ShapeNum = "30" >Azimut</text>
-<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "190" y = "2" width = "95.04382" height = "23.46093" ShapeName = "Transparent" ShapeNum = "31" >Ascension</text>
+<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "25" y = "2" width = "85.5373" height = "23.46093" ShapeName = "Transparent" ShapeNum = "30" >Elevation</text>
+<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "210" y = "2" width = "65.0933" height = "23.46093" ShapeName = "Transparent" ShapeNum = "31" >Azimut</text>
 <line style = "fill:none; stroke:WhiteSmoke; stroke-width:1" x1 = "5" y1 = "28" x2 = "315" y2 = "28" ShapeNum = "34" />
 <line style = "fill:none; stroke:WhiteSmoke; stroke-width:1" x1 = "5" y1 = "114" x2 = "315" y2 = "114" ShapeNum = "35" />
 <number style = "fill:White; stroke:RoyalBlue; font-family:; font-size:20pt" x = "245" y = "304" width = "24.16232" height = "33.51562" ShapeName = "Color" ShapeNum = "28" RadianNum = "0" >0</number>
@@ -21,12 +21,12 @@
 <circleGauge x = "152" y = "133" width = "164" height = "164" ShapeName = "Red" ShapeNum = "21" StoreType = "Local" RadianNum = "0" Direction = "2/6 Width"
  xlink:href = "C:\Users\Javi\OneDrive\formacion\Master\TFM\code\TouchScreenH35B_IC\SatTrack\SatTrack\image\image041.bmp">
 </circleGauge>
-<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:10pt" x = "2" y = "462" width = "85.95485" height = "16.75781" ShapeName = "Transparent" ShapeNum = "40" >Vers. 1.01.14</text>
+<text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:10pt" x = "2" y = "458" width = "85.95485" height = "16.75781" ShapeName = "Transparent" ShapeNum = "40" >Vers. 1.01.16</text>
 <text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "239" y = "385" width = "11.56337" height = "23.46093" ShapeName = "Transparent" ShapeNum = "43" >:</text>
 <text style = "fill:WhiteSmoke; stroke:Transparent; font-family:; font-size:14pt" x = "206" y = "385" width = "11.56337" height = "23.46093" ShapeName = "Transparent" ShapeNum = "42" >:</text>
-<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "180" y = "385" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "48" >00</text>
-<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "213" y = "385" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "49" >00</text>
-<text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "247" y = "385" width = "27.60503" height = "23.46093" ShapeName = "Color" ShapeNum = "50" >00</text>
 <rect style = "fill:none; stroke:Black; stroke-width:1" x = "152" y = "387" width = "19" height = "19" ShapeName = "Rectangle" ShapeNum = "51" />
 <text style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "80" y = "418" width = "128.148" height = "23.46093" ShapeName = "Color" ShapeNum = "41" >Satellite name</text>
+<number style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "247" y = "385" width = "16.91363" height = "23.46093" ShapeName = "Color" ShapeNum = "50" RadianNum = "0" >0</number>
+<number style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "180" y = "385" width = "16.91363" height = "23.46093" ShapeName = "Color" ShapeNum = "48" RadianNum = "0" >0</number>
+<number style = "fill:White; stroke:RoyalBlue; font-family:; font-size:14pt" x = "213" y = "385" width = "16.91363" height = "23.46093" ShapeName = "Color" ShapeNum = "49" RadianNum = "0" >0</number>
 </vlcd>

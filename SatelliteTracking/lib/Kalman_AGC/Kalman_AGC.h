@@ -21,8 +21,12 @@ public:
     Kalman_AGC();
 
     // Kalman filter: returns filtered angle
-    //void filteredState(float newAccelerometerAngle, float newGyroRate, float newCompassAngle, float dt, float newH_diagonal[3], float (&filteredState)[2]);
-    void filteredState(float newAccelerometerAngle, float newGyroRate, float newCompassAngle, float dt, float newH_diagonal[3], float &filteredState);
+    void filteredState(float newAccelerometerAngle, float newGyroRate, float newCompassAngle, float dt, float newH_diagonal[3], float (&filteredState)[2]);
+    //void filteredState(float newAccelerometerAngle, float newGyroRate, float newCompassAngle, float dt, float newH_diagonal[3], float &filteredState);
+
+    // Returns innovations vector = observation forecast error
+    void innovations(float (&vk)[3]);
+
 
     // Initialize Kalman filter values
     void initialize(float H_diagonal[3], float Q_diagonal[2], float a1[2], float P1_diagonal[2]);
@@ -44,6 +48,9 @@ private:
     // Q_k is (2x2) diagonal matrix  but we will use only its diagonal elements
     // This matrix will be constat along the whole filtering process
     float m_Q[2];
+
+    // innovation vector or observation forecast error
+    float m_v[3];
 
     // a_1: state vector (x_1) initial mean value:
     // a_k is a (2x1) vector

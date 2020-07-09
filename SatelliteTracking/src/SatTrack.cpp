@@ -92,24 +92,55 @@ STSerialMsg serialMsgESP(STSerialMsg::PORT_THREE);
 #if MEGA2560_TRACE_INFO
   unsigned long lastTimeTrace = millis();
   // TRACE_TIME_PERIOD must be greater or equal than ANGLES_TIME_PERIOD
-  const unsigned long TRACE_TIME_PERIOD = ANGLES_TIME_PERIOD + 500; // milliseconds
+  const unsigned long TRACE_TIME_PERIOD = ANGLES_TIME_PERIOD; // milliseconds
 #endif
 
 // Global varibles ---------------------------------------
 String strSatelliteListNames = "";
 String askTLEsatelliteName = "OSCAR 7 (AO-7)";
 
-// 22-05-2020 5:15:00
-char *psSatelliteTLE[] = {"ITUPSAT1                ",
-"1 35935U 09051E   20142.79780545  .00000077  00000-0  28797-4 0  9995",
-"2 35935  98.6206 326.2921 0007353 213.7759 146.2970 14.55613020565827"};
+//// // 22-05-2020 5:15:00
+//// char *psSatelliteTLE[] = {"ITUPSAT1                ",
+//// "1 35935U 09051E   20142.79780545  .00000077  00000-0  28797-4 0  9995",
+//// "2 35935  98.6206 326.2921 0007353 213.7759 146.2970 14.55613020565827"};
+//// // 01-06-2020 9:0:30
+//// char *psSatelliteTLE[] = {"BEESAT-3                ",
+//// "1 39135U 13015F   20152.90529515  .00000809  00000-0  48747-4 0  9998",
+//// "2 39135  64.8657 354.8565 0037014 250.6817 109.0305 15.18149603392706"};
+
+//// // 01-06-2020 9:0:30
+//// char *psSatelliteTLE[] = {"BEESAT-3                ",
+//// "1 39135U 13015F   20149.80919899  .00000684  00000-0  42744-4 0  9993",
+//// "2 39135  64.8659   4.8562 0037220 251.2881 108.4205 15.18143310392626"};
+
+
+//// // Leioa
+//// // 10-07-2020 9:16:0 - 9:26:0
+//// char *psSatelliteTLE[] = {"DELFI-C3 (DO-64)        ",
+//// "1 32789U 08021G   20181.67857140  .00000907  00000-0  63259-4 0  9995",
+//// "2 32789  97.4170 224.0528 0010279 274.3717  85.6337 15.07761691663754"};
+
+// Leioa
+// 10-07-2020 9:14:0 - 9:25:0
+char *psSatelliteTLE[] = {"DELFI-C3 (DO-64)        ",
+"1 32789U 08021G   20184.86410528  .00001163  00000-0  79979-4 0  9995",
+"2 32789  97.4169 227.1267 0010324 261.3421  98.6638 15.07768695664137"};
+
+//// // Leioa
+//// // 10-07-2020 9:11:0 - 9:24:0
+//// char *psSatelliteTLE[] = {"CAS-2T & KS-1Q          ",
+//// "1 41847U 16066G   20181.66127519  .00000040  00000-0  16486-4 0  9995",
+//// "2 41847  98.6528 232.3017 0365488 192.3805 166.8218 14.38073886191173"};
+
+
+
 
 // GPS variables -----------------------------------------
 const int DEFAULT_YEAR = 2020;
-const byte DEFAULT_MONTH = 5;
-const byte DEFAULT_DAY = 22;
-const byte DEFAULT_HOUR = 5;
-const byte DEFAULT_MINUTE = 15;
+const byte DEFAULT_MONTH = 7;
+const byte DEFAULT_DAY = 10;
+const byte DEFAULT_HOUR = 8;
+const byte DEFAULT_MINUTE = 55;
 const byte DEFAULT_SECOND = 00;
 
 uint32_t uGpsReceiving = 0x00;
@@ -165,7 +196,10 @@ int16_t tempRaw;
 double rollAccX = 0.0F, pitchAccY = 0.0F, yawAccZ = 0.0F;
 float yawAccZOffset;
 double rollAccXInit, pitchAccYInit, yawAccZInit;
+
 double gyroXrate = 0.0F, gyroYrate = 0.0F, gyroZrate = 0.0F;
+//float yawGyroZOffset;
+//double rollGyroXInit, pitchGyroYInit, yawGyroZInit;
 #if MEGA2560_TRACE_TEST
   // Angle calculated using the gyro only
   double gyroXangle, gyroYangle, gyroZangle;
@@ -182,11 +216,13 @@ float Q_diagonalY[2] = {ANGLE_SD_Y*ANGLE_SD_Y, ANGLE_RATE_SD_Y*ANGLE_RATE_SD_Y};
 float Q_diagonalZ[2] = {ANGLE_SD_Z*ANGLE_SD_Z, ANGLE_RATE_SD_Z*ANGLE_RATE_SD_Z};
 
 // Define Kalman filtered state vector: [ANGLE, ANGLE_RATE]
-// float auxKalmanState[2];
-float auxKalmanState;
+float auxKalmanState[2];
+//float auxKalmanState;
 
 // Calculated angle using a Kalman filter
 double kalAngleX, kalAngleY, kalAngleZ; 
+// Calculated angle rate (velocity) using a Kalman filter
+double kalVelocityX, kalVelocityY, kalVelocityZ; 
 
 uint32_t timer;
 #if MEGA2560_TRACE_INFO
@@ -211,11 +247,6 @@ Satellite sat = Satellite("OSCAR 7 (AO-7)          ",
 "1 07530U 74089B   20112.89879479 -.00000047  00000-0 -97882-5 0  9992",
 "2 07530 101.7949  82.9674 0012534 112.0012 304.6453 12.53643112 78903");
 DateTime  myDateTime ;
-
-char DEFAULT_PLACE[] = "Bilbao"; // "Leioa";
-const double DEFAULT_LATITUDE = 43.3000; // 43.328955;
-const double DEFAULT_LONGITUDE = 2.9333; // -2.966181;
-const double DEFAULT_ALTITUDE = 37.0; // 40.0; // meters
 
 //   Observer postition. Plan13
 char *observerPlace = DEFAULT_PLACE;
@@ -441,6 +472,9 @@ void setup() {
 
   yawAccZOffset = (yawZcompassInit - yawAccZInit);
   yawAccZOffset = getPositiveAngle(yawAccZOffset);
+
+  //yawGyroZOffset = (yawZcompassInit - yawGyroZInit);
+  //yawGyroZOffset = getPositiveAngle(yawGyroZOffset);
 
   #if MEGA2560_TRACE_TEST
     debugMessage = String(rollXcompassInit*RAD_TO_DEG) + String("\t") + String(pitchYcompassInit*RAD_TO_DEG) + String("\t") + String(yawZcompassInit*RAD_TO_DEG);
@@ -804,25 +838,35 @@ inline void showTraceInfo()
   // Number of decimals
   const byte N_DEC = 8;
   #if MEGA2560_TRACE_INFO
-  /*
-    debugMessage = String(timer) + String("\t") + String(dt) 
-    + String("\t") + String(rollAccX, N_DEC) + String("\t") + String(pitchAccY, N_DEC) + String("\t") + String(yawAccZ, N_DEC)
+    float vk[3];
+  
+    debugMessage = String(timer) + String("\t") + String(dt);
+    debugMessage += String("\t") + String(rollAccX, N_DEC) + String("\t") + String(pitchAccY, N_DEC) + String("\t") + String(yawAccZ, N_DEC);
     #if MEGA2560_TRACE_TEST
     + String("\t")  + String(gyroXangle) + String("\t") + String(gyroYangle)
     #endif
-    + String("\t")  + String(gyroXrate, N_DEC) + String("\t") + String(gyroYrate, N_DEC) + String("\t") + String(gyroZrate, N_DEC)
-    + String("\t")  + String(rollXcompass, N_DEC)+ String("\t")  + String(pitchYcompass, N_DEC) + String("\t") + String(yawZcompass, N_DEC)
-    + String("\t") + String(kalAngleX, N_DEC) + String("\t") + String(kalAngleY, N_DEC) + String("\t") + String(kalAngleZ, N_DEC)
-    + String("\t") + String(sigma2accX, N_DEC) + String("\t") + String(sigma2accY, N_DEC) + String("\t") + String(sigma2accZ, N_DEC)
-    + String("\t") + String(sigma2gyroX, N_DEC) + String("\t") + String(sigma2gyroY, N_DEC) + String("\t") + String(sigma2gyroZ, N_DEC)
-    + String("\t") + String(sigma2compassX, N_DEC) + String("\t") + String(sigma2compassY, N_DEC) + String("\t") + String(sigma2compassZ, N_DEC)
-    + String("\t") + String(heading, N_DEC)  
-    + String("\t") + String(horizontalHeadingAngle, N_DEC);
+    debugMessage += String("\t")  + String(gyroXrate, N_DEC) + String("\t") + String(gyroYrate, N_DEC) + String("\t") + String(gyroZrate, N_DEC);
+    debugMessage += String("\t")  + String(rollXcompass, N_DEC)+ String("\t")  + String(pitchYcompass, N_DEC) + String("\t") + String(yawZcompass, N_DEC);
+    debugMessage += String("\t") + String(kalAngleX, N_DEC) + String("\t") + String(kalAngleY, N_DEC) + String("\t") + String(kalAngleZ, N_DEC);
+    debugMessage += String("\t") + String(kalVelocityX, N_DEC) + String("\t") + String(kalVelocityY, N_DEC) + String("\t") + String(kalVelocityZ, N_DEC);
+
+    kalmanX.innovations(vk);
+    debugMessage += String("\t") + String(vk[kalmanX.ACCELER], N_DEC) + String("\t") + String(vk[kalmanX.GYROSPE], N_DEC) + String("\t") + String(vk[kalmanX.COMPASS], N_DEC);
+    kalmanY.innovations(vk);
+    debugMessage += String("\t") + String(vk[kalmanY.ACCELER], N_DEC) + String("\t") + String(vk[kalmanY.GYROSPE], N_DEC) + String("\t") + String(vk[kalmanY.COMPASS], N_DEC);
+    kalmanZ.innovations(vk);
+    debugMessage += String("\t") + String(vk[kalmanZ.ACCELER], N_DEC) + String("\t") + String(vk[kalmanZ.GYROSPE], N_DEC) + String("\t") + String(vk[kalmanZ.COMPASS], N_DEC);
+
+    debugMessage += String("\t") + String(sigma2accX, N_DEC) + String("\t") + String(sigma2accY, N_DEC) + String("\t") + String(sigma2accZ, N_DEC);
+    debugMessage += String("\t") + String(sigma2gyroX, N_DEC) + String("\t") + String(sigma2gyroY, N_DEC) + String("\t") + String(sigma2gyroZ, N_DEC);
+    debugMessage += String("\t") + String(sigma2compassX, N_DEC) + String("\t") + String(sigma2compassY, N_DEC) + String("\t") + String(sigma2compassZ, N_DEC);
+    debugMessage += String("\t") + String(heading, N_DEC);
+    debugMessage += String("\t") + String(horizontalHeadingAngle, N_DEC);
 
     // debugMessage += String("\t") + String(accX) + String("\t") +  String(accY) + String("\t") +  String(accZ);
     debugMessage += String("\t") + String(compass.rawValueX()) + String("\t") +  String(compass.rawValueY()) + String("\t") +  String(compass.rawValueZ());
     debugMessage += String("\t") + String(headingXZ, N_DEC) + String("\t") +  String(headingZY, N_DEC);
-*/
+
 
     // // Compass Variance
     // debugMessage = String(sigma2compassX, N_DEC) + String("\t") + String(sigma2compassY, N_DEC) + String("\t") + String(sigma2compassZ, N_DEC); 
@@ -832,10 +876,10 @@ inline void showTraceInfo()
     // + String("\t") + String(year) + String("\t") + String(month) + String("\t") + String(day)
     // + String("\t") + String(hour) + String("\t") + String(minute) + String("\t") + String(second);
 
-    // Kalman and sd Acc
-    debugMessage = String(kalAngleX*RAD_TO_DEG) + String("\t") + String(kalAngleY*RAD_TO_DEG) + String("\t") + String(kalAngleZ*RAD_TO_DEG);
-    //debugMessage += String("\t") + String(sigma2accX) + String("\t") + String(sigma2accY) + String("\t") + String(sigma2accZ);
-    debugMessage += String("\t") + String(rollAccX*RAD_TO_DEG) + String("\t") + String(pitchAccY*RAD_TO_DEG) + String("\t") + String(yawAccZ*RAD_TO_DEG);
+    // // Kalman and sd Acc
+    // debugMessage = String(kalAngleX*RAD_TO_DEG) + String("\t") + String(kalAngleY*RAD_TO_DEG) + String("\t") + String(kalAngleZ*RAD_TO_DEG);
+    // //debugMessage += String("\t") + String(sigma2accX) + String("\t") + String(sigma2accY) + String("\t") + String(sigma2accZ);
+    // debugMessage += String("\t") + String(rollAccX*RAD_TO_DEG) + String("\t") + String(pitchAccY*RAD_TO_DEG) + String("\t") + String(yawAccZ*RAD_TO_DEG);
     // // Raw compass
     // int16_t compassX, compassY, compassZ;
     // compass.m_readRaw(&compassX, &compassY, &compassZ,false);
@@ -1121,14 +1165,17 @@ inline void calculateRotationAngles()
 
   // Calculate angles using Kalman filter
   kalmanX.filteredState(rollAccX, gyroXrate, rollXcompass, dt, H_diagonalX, auxKalmanState);
-  /// kalAngleX = auxKalmanState[ANGLE];
-  kalAngleX = auxKalmanState;
+  kalAngleX = (double) auxKalmanState[kalmanX.ANGLE];
+  kalVelocityX = (double) auxKalmanState[kalmanX.ANGLE_RATE];
+  /// kalAngleX = auxKalmanState;
   kalmanY.filteredState(pitchAccY, gyroYrate, pitchYcompass, dt, H_diagonalY, auxKalmanState);
-  /// kalAngleY = auxKalmanState[ANGLE];
-  kalAngleY = auxKalmanState;
+  kalAngleY = (double) auxKalmanState[kalmanY.ANGLE];
+  kalVelocityY = (double) auxKalmanState[kalmanY.ANGLE_RATE];
+  /// kalAngleY = auxKalmanState;
   kalmanZ.filteredState(yawAccZ, gyroZrate, yawZcompass, dt, H_diagonalZ, auxKalmanState);
-  /// kalAngleZ = auxKalmanState[ANGLE];
-  kalAngleZ = auxKalmanState;
+  kalAngleZ = (double) auxKalmanState[kalmanZ.ANGLE];
+  kalVelocityZ = (double) auxKalmanState[kalmanZ.ANGLE_RATE];
+  /// kalAngleZ = auxKalmanState;
 
 
   #if MEGA2560_TRACE_TEST
@@ -1231,9 +1278,11 @@ inline void horizontalHeading()
   /// // double zh = mx * sin(kalAngleY)*cos(kalAngleX) - my * sin(kalAngleX) + mz * cos(kalAngleY)*cos(kalAngleX);
 
   // Calculate yaw angle. Local declination correction was added yet
-  horizontalHeadingAngle = atan2(yh,xh);
+  /// horizontalHeadingAngle = atan2(yh,xh);
+  horizontalHeadingAngle = atan2(-xh,yh) + M_PI_2;
   // Allow only positive values
   horizontalHeadingAngle = positiveAngle(horizontalHeadingAngle);
+
 
   // Calculate Pitch projection
   headingXZ = atan2(xh,zh);

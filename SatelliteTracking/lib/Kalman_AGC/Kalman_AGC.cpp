@@ -77,15 +77,14 @@ void Kalman_AGC::filteredState(float newAccelerometerAngle,
         float newCompassAngle, 
         float dt, 
         float newH_diagonal[3], 
-        //float  (&stateVector)[2])
-        float  &stateVector)
+        float  (&stateVector)[2])
+        //float  &stateVector)
 {
     // Innovation ----------------------------------------
     // v = y - Z a
-    // float vk[3];
-    // vk[ACCELER] = newAccelerometerAngle - m_a[ANGLE];
-    // vk[GYROSPE] = newGyroRate - m_a[ANGLE_RATE];
-    // vk[COMPASS] = newCompassAngle - m_a[ANGLE];
+    m_v[ACCELER] = newAccelerometerAngle - m_a[ANGLE];
+    m_v[GYROSPE] = newGyroRate - m_a[ANGLE_RATE];
+    m_v[COMPASS] = newCompassAngle - m_a[ANGLE];
     // ---------------------------------------------------
     // F_k: innovation variance matrix
     // F[0][0] = m_P[0][0] + newH_diagonal[ACCELER]
@@ -186,7 +185,15 @@ void Kalman_AGC::filteredState(float newAccelerometerAngle,
     m_P[1][1] = m_P_kp1[1][1];
 
     // Return filtered values
-    stateVector = m_a[ANGLE];
-    //stateVector[ANGLE] = m_a[ANGLE];
-    //stateVector[ANGLE_RATE] = m_a[ANGLE_RATE];
+    /// stateVector = m_a[ANGLE];
+    stateVector[ANGLE] = m_a[ANGLE];
+    stateVector[ANGLE_RATE] = m_a[ANGLE_RATE];
+}
+
+
+void Kalman_AGC::innovations(float (&vk)[3])
+{
+    vk[ACCELER] = m_v[ACCELER];
+    vk[GYROSPE] = m_v[GYROSPE];
+    vk[COMPASS] = m_v[COMPASS];
 }

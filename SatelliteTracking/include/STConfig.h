@@ -15,6 +15,14 @@ namespace SatTrack
     //// #define UTC_CITY "MADRID"
     // ---------------------------------------------------------
 
+    // Observer's location
+    char DEFAULT_PLACE[] = "Leioa"; // "Bilbao";
+    const double DEFAULT_LATITUDE = 43.329392; //43.3000;
+    const double DEFAULT_LONGITUDE = -2.969303; // 2.9333;
+    const double DEFAULT_ALTITUDE = 37.0; // 40.0; // meters
+
+
+
     #ifdef THIS_PROJECT_HAS_ESP8266
     // ---------------------------------------------------------
     // WiFi configuration --------------------------------------
@@ -87,9 +95,9 @@ namespace SatTrack
     const float ANGLE_SD_X = 1.0F * DEG_TO_RAD;// 0.4165443F; //0.01F * DEG_TO_RAD;
     const float ANGLE_SD_Y = 1.0F * DEG_TO_RAD;// 0.4165443F; //0.01F * DEG_TO_RAD;
     const float ANGLE_SD_Z = 1.0F * DEG_TO_RAD;// 0.4165443F; //0.01F * DEG_TO_RAD;
-    const float ANGLE_RATE_SD_X = 1.1E-2F * DEG_TO_RAD;// 0.006444372F; //1.1E-5F * DEG_TO_RAD;
-    const float ANGLE_RATE_SD_Y = 1.1E-2F * DEG_TO_RAD;// 0.002441045F; //1.1E-5F * DEG_TO_RAD;
-    const float ANGLE_RATE_SD_Z = 1.1E-2F * DEG_TO_RAD;// 0.03900503F; //1.1E-5F * DEG_TO_RAD;
+    const float ANGLE_RATE_SD_X = 1.5E-1F * DEG_TO_RAD;// 1.1E-1F * DEG_TO_RAD;// 1.1E-2F * DEG_TO_RAD;// 1.1E-5F * DEG_TO_RAD;
+    const float ANGLE_RATE_SD_Y = 1.5E-1F * DEG_TO_RAD;// 1.1E-1F * DEG_TO_RAD;// 1.1E-2F * DEG_TO_RAD;// 1.1E-5F * DEG_TO_RAD;
+    const float ANGLE_RATE_SD_Z = 1.5E-1F * DEG_TO_RAD;// 1.1E-1F * DEG_TO_RAD;// 1.1E-2F * DEG_TO_RAD;// 1.1E-5F * DEG_TO_RAD;
 
 
     // ---------------------------------------------------------

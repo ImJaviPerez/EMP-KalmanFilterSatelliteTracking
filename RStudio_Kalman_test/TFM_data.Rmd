@@ -5,6 +5,11 @@ subtitle: "Localización de satélites"
 author: "F. Javier Pérez Ramírez. UPV-EHU"
 date: "27 de enero de 2020"
 output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+    number_sections: yes
   pdf_document:
     keep_tex: yes
     number_sections: yes
@@ -12,11 +17,6 @@ output:
     toc_depth: 3
     fig_caption: yes
     fig_height: 4
-  html_document:
-    df_print: paged
-    toc: yes
-    toc_depth: '3'
-    number_sections: yes
 header-includes:
 - \usepackage{float}          # To insert figures caption
 - \floatplacement{figure}{H}  # To insert figures caption
@@ -151,7 +151,7 @@ angXY.df$yawZcompass <- angXY.df$yawZcompass - yaw0
 # Inicial angle + cumsum(...)
 rectangle.X <- angXY.df$rollAccX[1] + cumsum(angXY.df$dt * angXY.df$gyroXrate)/1000
 rectangle.Y <- angXY.df$pitchAccY[1] + cumsum(angXY.df$dt * angXY.df$gyroYrate)/1000
-rectangle.Z <- angXY.df$yawAccZ[1] + cumsum(angXY.df$dt * angXY.df$gyroZrate)/1000
+rectangle.Z <- angXY.df$yawZcompass[1] + cumsum(angXY.df$dt * angXY.df$gyroZrate)/1000
 
 # Trapezoidal integration
 # Let's  imagine two rectangles with height omega_k and omega_(k-1)
@@ -309,8 +309,8 @@ plot.zoo(angXY,
 
 ```{r}
 library(ggplot2)
-dfData <- data.frame(yawZcompass = angXY.df$heading*RAD_TO_DEG, 
-                    horizontalHeadingAngle=angXY.df$horizontalHeadingAngle*RAD_TO_DEG, 
+dfData <- data.frame(yawZcompass = (angXY.df$heading)*RAD_TO_DEG, 
+                    horizontalHeadingAngle=(angXY.df$horizontalHeadingAngle)*RAD_TO_DEG, 
                     kalAngleX=anglesInPI(angXY.df$kalAngleX)*RAD_TO_DEG, 
                     kalAngleY=(angXY.df$kalAngleY)*RAD_TO_DEG, 
                     kalAngleZ=angXY.df$kalAngleZ*RAD_TO_DEG, 
@@ -357,6 +357,51 @@ boxplot((anglesIn0to2PI(angXY.df$atan2YawCompas) - angXY.df$yawZcompass)*RAD_TO_
 
 
 
+```{r}
+library(ggplot2)
+dfData <- data.frame(heading = angXY.df$heading*RAD_TO_DEG, 
+                    horizontalHeadingAngle=angXY.df$horizontalHeadingAngle*RAD_TO_DEG, 
+                    horizontalXZ=(angXY.df$headingXZ - angXY.df$headingXZ[1])*RAD_TO_DEG, 
+                    horizontalZY=(angXY.df$headingZY - angXY.df$headingZY[1])*RAD_TO_DEG, 
+                    #horizontalXZ2=(angXY.df$headingXZ2 - angXY.df$headingXZ2[1])*RAD_TO_DEG, 
+                    #horizontalZY2=(angXY.df$headingZY2 - angXY.df$headingZY2[1])*RAD_TO_DEG, 
+                    rollXcompass=anglesInPI(angXY.df$rollXcompass)*RAD_TO_DEG, 
+                    pitchYcompass=anglesInPI(angXY.df$pitchYcompass)*RAD_TO_DEG, 
+                    yawZcompass=(angXY.df$yawZcompass)*RAD_TO_DEG, 
+                    t=seq(1:nrow(angXY.df)))
+headingAnglesGG <- ggplot(data=dfData, 
+       aes(x=t, y=heading, colour="Brújula")) +
+  geom_line() +
+  scale_colour_manual("", 
+                    breaks = c("Brújula", "Brújula proyecc. horizontal", 
+                               "Brújula proyecc. pitch", "Brújula proyecc. roll",
+                               "#Brújula proyecc2. pitch", "Brújula proyecc2. roll",
+                               "rollXcompass", "pitchYcompass", "yawZcompass"),
+                    values = c("Brújula"="red", 
+                               "Brújula proyecc. horizontal"="blue", 
+                               "Brújula proyecc. pitch"="green", 
+                               #"Brújula proyecc2. roll"="cyan", 
+                               #"Brújula proyecc2. pitch"="orange", 
+                               "Brújula proyecc. roll"="blue", 
+                               "rollXcompass"="darkorange4",
+                               "pitchYcompass"="darkturquoise",
+                               "yawZcompass"="darkviolet"))
+  ## ggtitle("Angulo eje X")
+  
+headingAnglesGG +
+  geom_line(data = dfData, aes(x=t, y=horizontalZY, colour = "Brújula proyecc. roll")) +
+  geom_line(data = dfData, aes(x=t, y=horizontalXZ, colour = "Brújula proyecc. pitch")) +
+  #geom_line(data = dfData, aes(x=t, y=horizontalZY, colour = "Brújula proyecc2. roll")) +
+  geom_line(data = dfData, aes(x=t, y=horizontalXZ, colour = "Brújula proyecc2. pitch")) +
+  #geom_line(data = dfData, aes(x=t, y=horizontalHeadingAngle, colour = "Brújula proyecc. horizontal")) +
+  #geom_line(data = dfData, aes(x=t, y=rollXcompass, colour = "rollXcompass")) +
+  geom_line(data = dfData, aes(x=t, y=pitchYcompass, colour = "pitchYcompass")) +
+  #geom_line(data = dfData, aes(x=t, y=yawZcompass, colour = "yawZcompass"))+
+  ylab("Ángulo (º)") + xlab("t (ms)") +
+  theme_bw()
+```
+
+
 
 # Ángulos
 Se muestra el ángulo **roll**, **pitch** y **yaw** de los tres disposivos + kalman
@@ -377,7 +422,7 @@ plotAnglesAGC_KmpuKcalc <- function(theAxix="X"){
     dfData <- data.frame(accAngle = anglesInPI(angXY.df$pitchAccY)*RAD_TO_DEG, 
                         csGyro=anglesInPI(angXY.df$csGyroY)*RAD_TO_DEG,
                         rotationCompass=anglesInPI(angXY.df$pitchYcompass)*RAD_TO_DEG, 
-                        kalmanAngleMPU6050=(angXY.df$kalAngleY)*RAD_TO_DEG,
+                        kalmanAngleMPU6050=anglesInPI(angXY.df$kalAngleY)*RAD_TO_DEG,
                         t=angXY.df$micros/1000)
   }else if (theAxix == "Z")
   {
@@ -403,13 +448,296 @@ plotAnglesAGC_KmpuKcalc <- function(theAxix="X"){
     geom_line(data = dfData, aes(x=t, y=csGyro, colour = "Giróscopo")) +
     geom_line(data = dfData, aes(x=t, y=rotationCompass, colour = "Brújula")) +
     geom_line(data = dfData, aes(x=t, y=kalmanAngleMPU6050, colour = "Kalman MPU")) +
-    ylab("Ángulo (rad)") + xlab("t (ms)") +
+    ylab(expression("Ángulo(" * degree *")")) + xlab("t (ms)") +
     theme_bw()
 }
 
-plotAnglesAGC_KmpuKcalc(theAxix="X")
-plotAnglesAGC_KmpuKcalc(theAxix="Y")
-plotAnglesAGC_KmpuKcalc(theAxix="Z")
+(pAGC_GG_X <- plotAnglesAGC_KmpuKcalc(theAxix="X"))
+(pAGC_GG_Y <- plotAnglesAGC_KmpuKcalc(theAxix="Y"))
+(pAGC_GG_Z <- plotAnglesAGC_KmpuKcalc(theAxix="Z"))
+```
+
+
+# Velocidad angular
+Se muestra la velocidad angular del giróscopo en torno a los ejes $X$, $Y$ y $Z$ + kalman
+
+Se plotea el resultado
+```{r}
+# Create new variables
+# Accelerometer velocity
+angXY.df$vAccX <- anglesInPI(angXY.df$rollAccX - shift(angXY.df$rollAccX))/(angXY.df$dt * 1e-3)
+angXY.df$vAccX[1] <- angXY.df$vAccX[2]
+angXY.df$vAccY <- anglesInPI(angXY.df$pitchAccY - shift(angXY.df$pitchAccY))/(angXY.df$dt * 1e-3)
+angXY.df$vAccY[1] <- angXY.df$vAccY[2]
+angXY.df$vAccZ <- anglesInPI(angXY.df$yawAccZ - shift(angXY.df$yawAccZ))/(angXY.df$dt * 1e-3)
+angXY.df$vAccZ[1] <- angXY.df$vAccZ[2]
+# Compass velocity
+angXY.df$vCompassX <- anglesInPI(angXY.df$rollXcompass - shift(angXY.df$rollXcompass))/(angXY.df$dt * 1e-3)
+angXY.df$vCompassX[1] <- angXY.df$vCompassX[2]
+angXY.df$vCompassY <- anglesInPI(angXY.df$pitchYcompass - shift(angXY.df$pitchYcompass))/(angXY.df$dt * 1e-3)
+angXY.df$vCompassY[1] <- angXY.df$vCompassY[2]
+angXY.df$vCompassZ <- anglesInPI(angXY.df$yawZcompass - shift(angXY.df$yawZcompass))/(angXY.df$dt * 1e-3)
+angXY.df$vCompassZ[1] <- angXY.df$vCompassZ[2]
+
+# Plot values
+plotVelocityAGC_KmpuKcalc <- function(theAxix="X"){
+  if (theAxix == "X")
+  {
+    dfData <- data.frame(accVeloc =(angXY.df$vAccX)*RAD_TO_DEG,
+                        gyroRate =(angXY.df$gyroXrate)*RAD_TO_DEG, 
+                        compassVeloc = (angXY.df$vCompassX)*RAD_TO_DEG,
+                        kalmanVelocityMPU6050=(angXY.df$kalVelocityX)*RAD_TO_DEG,
+                        t=angXY.df$micros/1000)
+  }else if (theAxix == "Y")
+  {
+    dfData <- data.frame(accVeloc =(angXY.df$vAccY)*RAD_TO_DEG,
+                        gyroRate =(angXY.df$gyroYrate)*RAD_TO_DEG, 
+                        compassVeloc = (angXY.df$vCompassY)*RAD_TO_DEG,
+                        kalmanVelocityMPU6050=(angXY.df$kalVelocityY)*RAD_TO_DEG,
+                        t=angXY.df$micros/1000)
+  }else if (theAxix == "Z")
+  {
+    dfData <- data.frame(accVeloc =(angXY.df$vAccZ)*RAD_TO_DEG,
+                        gyroRate = (angXY.df$gyroZrate)*RAD_TO_DEG, 
+                        compassVeloc = (angXY.df$vCompassZ)*RAD_TO_DEG,
+                        kalmanVelocityMPU6050=(angXY.df$kalVelocityZ)*RAD_TO_DEG,
+                        t=angXY.df$micros/1000)
+  }
+  
+  mainAnglesGG <- ggplot(data=dfData, 
+#         aes(x=t, y=accVeloc, colour="Acelerómetro")) +
+         aes(x=t, y=gyroRate, colour="Giróscopo")) +
+    geom_line() +
+    scale_colour_manual("", 
+                      breaks = c("Acelerómetro", "Giróscopo", "Brújula", "Kalman MPU"),
+                      values = c("Acelerómetro"="blue", 
+                                 "Giróscopo"="darkorange", 
+                                 "Brújula"="red",
+                                 "Kalman MPU" = "black"))
+    
+    
+  mainAnglesGG +
+    #geom_line(data = dfData, aes(x=t, y=accVeloc, colour = "Acelerómetro")) +
+    #geom_line(data = dfData, aes(x=t, y=compassVeloc, colour = "Brújula")) +
+    geom_line(data = dfData, aes(x=t, y=kalmanVelocityMPU6050, colour = "Kalman MPU")) +
+    ylab(expression("Velocidad(" * degree * s^-1 *")")) + xlab("t (ms)") +
+    theme_bw()
+}
+
+(vAGC_GG_X <- plotVelocityAGC_KmpuKcalc(theAxix="X"))
+(vAGC_GG_Y <- plotVelocityAGC_KmpuKcalc(theAxix="Y"))
+(vAGC_GG_Z <- plotVelocityAGC_KmpuKcalc(theAxix="Z"))
+```
+
+Me pregunto ¿La velocidad es *constante* entre medida y medida?
+Calculo:
+$$
+\frac{\Delta v}{\bar v} = \frac{v_2 - v_1}{\frac{v_2 + v_1}{2}}
+$$
+```{r}
+velocityChanges <- function(dfVelocity)
+{
+  
+  vChangesDiff <- dfVelocity - shift(dfVelocity)
+  vChangesMean <- dfVelocity + shift(dfVelocity)/2
+  
+  vChanges <- vChangesDiff/vChangesMean
+  return(vChanges)
+}
+
+
+dfAux <- data.frame(DeltaV = velocityChanges(angXY.df$kalVelocityX))
+
+ggplot(data=dfAux, aes(x = "", y = DeltaV) ) +
+  geom_boxplot() +
+  #scale_fill_manual(breaks = c("Azimut","Elevación"), 
+  #                  values=c("white", "grey")) +
+  xlab("") +
+  ylab(expression(Delta * "v(" * degree * s^-1 *")")) +
+  theme_bw()
+
+dfAux <- data.frame(DeltaV = velocityChanges(angXY.df$kalVelocityY))
+
+ggplot(data=dfAux, aes(x = "", y = DeltaV) ) +
+  geom_boxplot() +
+  #scale_fill_manual(breaks = c("Azimut","Elevación"), 
+  #                  values=c("white", "grey")) +
+  xlab("") +
+  ylab(expression(Delta * "v(" * degree * s^-1 *")")) +
+  theme_bw()
+
+dfAux <- data.frame(DeltaV = velocityChanges(angXY.df$kalVelocityZ))
+
+ggplot(data=dfAux, aes(x = "", y = DeltaV) ) +
+  geom_boxplot() +
+  #scale_fill_manual(breaks = c("Azimut","Elevación"), 
+  #                  values=c("white", "grey")) +
+  xlab("") +
+  ylab(expression(Delta * "v(" * degree * s^-1 *")")) +
+  theme_bw()
+```
+
+
+# Aceleración angular
+Se muestra una estimación de la aceleración angular del giróscopo en torno a los ejes $X$, $Y$ y $Z$. Por una lado se toma:
+ $$a = \frac{\Delta v(\text{giróscopo})}{\Delta t}$$
+ y por otro se toma
+ $$a = \frac{\Delta v(\text{kalman})}{\Delta t}$$
+y se comparan los resultados
+
+Se plotea el resultado
+```{r}
+# Calculate Delta gyro -----------------------------------
+angXY.df$aGyroX <- (angXY.df$gyroXrate - shift(angXY.df$gyroXrate)) / (angXY.df$dt * 1e-3)
+# angXY.df$aGyroX[1] = NA, so Fisrt aGyroX = second aGyroX
+angXY.df$aGyroX[1] <- angXY.df$aGyroX[2]
+
+angXY.df$aGyroY <- (angXY.df$gyroYrate - shift(angXY.df$gyroYrate)) / (angXY.df$dt * 1e-3)
+# angXY.df$aGyroY[1] = NA, so Fisrt aGyroY = second aGyroY
+angXY.df$aGyroY[1] <- angXY.df$aGyroY[2]
+
+angXY.df$aGyroZ <- (angXY.df$gyroZrate - shift(angXY.df$gyroZrate)) / (angXY.df$dt * 1e-3)
+# angXY.df$aGyroZ[1] = NA, so Fisrt aGyroZ = second aGyroZ
+angXY.df$aGyroZ[1] <- angXY.df$aGyroZ[2]
+
+# Calculate Delta Kalman ---------------------------------
+angXY.df$aKalmanX <- (angXY.df$kalVelocityX - shift(angXY.df$kalVelocityX)) / (angXY.df$dt * 1e-3)
+# angXY.df$aKalmanX[1] = NA, so Fisrt aKalmanX = second aKalmanX
+angXY.df$aKalmanX[1] <- angXY.df$aKalmanX[2]
+
+angXY.df$aKalmanY <- (angXY.df$kalVelocityY - shift(angXY.df$kalVelocityY)) / (angXY.df$dt * 1e-3)
+# angXY.df$aKalmanY[1] = NA, so Fisrt aKalmanY = second aKalmanY
+angXY.df$aKalmanY[1] <- angXY.df$aKalmanY[2]
+
+angXY.df$aKalmanZ <- (angXY.df$kalVelocityZ - shift(angXY.df$kalVelocityZ)) / (angXY.df$dt * 1e-3)
+# angXY.df$aKalmanZ[1] = NA, so Fisrt aKalmanZ = second aKalmanZ
+angXY.df$aKalmanZ[1] <- angXY.df$aKalmanZ[2]
+
+# Plot values
+plotAccelerationAGC <- function(theAxix="X"){
+  if (theAxix == "X")
+  {
+    dfData <- data.frame(aGyro =(angXY.df$aGyroX)*RAD_TO_DEG, 
+                        aKalmanMPU6050=(angXY.df$aKalmanX)*RAD_TO_DEG,
+                        t=angXY.df$micros/1000)
+  }else if (theAxix == "Y")
+  {
+    dfData <- data.frame(aGyro =(angXY.df$aGyroY)*RAD_TO_DEG, 
+                        aKalmanMPU6050=(angXY.df$aKalmanY)*RAD_TO_DEG,
+                        t=angXY.df$micros/1000)
+  }else if (theAxix == "Z")
+  {
+    dfData <- data.frame(aGyro = (angXY.df$aGyroZ)*RAD_TO_DEG, 
+                        aKalmanMPU6050=(angXY.df$aKalmanZ)*RAD_TO_DEG,
+                        t=angXY.df$micros/1000)
+  }
+  
+  mainAnglesGG <- ggplot(data=dfData, 
+         aes(x=t, y=aGyro, colour="Giróscopo")) +
+    geom_line() +
+    scale_colour_manual("", 
+                      breaks = c("Giróscopo", "Kalman MPU"),
+                      values = c("Giróscopo"="darkorange", 
+                                 "Kalman MPU" = "black"))
+    
+    
+  mainAnglesGG +
+    geom_line(data = dfData, aes(x=t, y=aKalmanMPU6050, colour = "Kalman MPU")) +
+    ylab(expression("Aceleración(" * degree * s^-2 *")")) + xlab("t (ms)") +
+    theme_bw()
+}
+
+(aAGC_GG_X <- plotAccelerationAGC(theAxix="X"))
+(aAGC_GG_Y <- plotAccelerationAGC(theAxix="Y"))
+(aAGC_GG_Z <- plotAccelerationAGC(theAxix="Z"))
+```
+
+```{r}
+# Show two figures together
+library(gridExtra)
+grid.arrange(pAGC_GG_X, vAGC_GG_X, nrow = 2)
+grid.arrange(pAGC_GG_Y, vAGC_GG_Y, nrow = 2)
+grid.arrange(pAGC_GG_Z, vAGC_GG_Z, nrow = 2)
+
+# Show three figures together
+library(gridExtra)
+grid.arrange(pAGC_GG_X, vAGC_GG_X, aAGC_GG_X, nrow = 3)
+grid.arrange(pAGC_GG_Y, vAGC_GG_Y, aAGC_GG_Y, nrow = 3)
+grid.arrange(pAGC_GG_Z, vAGC_GG_Z, aAGC_GG_Z, nrow = 3)
+```
+
+# Innovacion o error de la predicción de la observación
+
+
+Se plotea el resultado
+```{r}
+# Plot values
+plotInnovation <- function(theAxix="X"){
+  if (theAxix == "X")
+  {
+    dfData <- data.frame(vkAcc =anglesInPI(angXY.df$vkAccX)*RAD_TO_DEG, 
+                        vkGyro=anglesInPI(cumsum(angXY.df$vkGyroX * angXY.df$dt) / 1000)*RAD_TO_DEG,
+                        vkCompass=anglesInPI(angXY.df$vkCompassX)*RAD_TO_DEG, 
+                        t=angXY.df$micros/1000)
+  }else if (theAxix == "Y")
+  {
+    dfData <- data.frame(vkAcc = anglesInPI(angXY.df$vkAccY)*RAD_TO_DEG, 
+                        vkGyro=anglesInPI(cumsum(angXY.df$vkGyroY * angXY.df$dt) / 1000)*RAD_TO_DEG,
+                        vkCompass=anglesInPI(angXY.df$vkCompassY)*RAD_TO_DEG, 
+                        t=angXY.df$micros/1000)
+  }else if (theAxix == "Z")
+  {
+    dfData <- data.frame(vkAcc = anglesInPI(angXY.df$vkAccZ)*RAD_TO_DEG, 
+                        vkGyro=anglesInPI(cumsum(angXY.df$vkGyroZ * angXY.df$dt) / 1000)*RAD_TO_DEG,
+                        vkCompass=anglesInPI(angXY.df$vkCompassZ)*RAD_TO_DEG, 
+                        t=angXY.df$micros/1000)
+  }
+  
+  mainAnglesGG <- ggplot(data=dfData, 
+         aes(x=t, y=vkAcc, colour="Acelerómetro")) +
+    geom_line() +
+    scale_colour_manual("", 
+                      breaks = c("Acelerómetro", "Giróscopo", "Brújula"),
+                      values = c("Acelerómetro"="blue", 
+                                 "Giróscopo"="darkorange", 
+                                 "Brújula"="red"))
+    
+    
+  mainAnglesGG +
+    geom_line(data = dfData, aes(x=t, y=vkGyro, colour = "Giróscopo")) +
+    geom_line(data = dfData, aes(x=t, y=vkCompass, colour = "Brújula")) +
+    ylab(expression("Error(" * degree *")")) + xlab("t (ms)") +
+    theme_bw()
+}
+
+(pInnovation_X <- plotInnovation(theAxix="X"))
+(pInnovation_Y <- plotInnovation(theAxix="Y"))
+(pInnovation_Z <- plotInnovation(theAxix="Z"))
+```
+
+
+
+```{r}
+# Show three figures together
+library(gridExtra)
+grid.arrange(pAGC_GG_X, vAGC_GG_X, pInnovation_X, nrow = 3, heights = c(2,1,1))
+grid.arrange(pAGC_GG_Y, vAGC_GG_Y, pInnovation_Y, nrow = 3, heights = c(2,1,1))
+grid.arrange(pAGC_GG_Z, vAGC_GG_Z, pInnovation_Z, nrow = 3, heights = c(2,1,1))
+
+
+grid.arrange(pAGC_GG_X, pInnovation_X, nrow = 2, heights = c(2.5,1))
+grid.arrange(pAGC_GG_Y, pInnovation_Y, nrow = 2, heights = c(2.5,1))
+grid.arrange(pAGC_GG_Z, pInnovation_Z, nrow = 2, heights = c(2.5,1))
+
+# # Show three figures together
+# library(gridExtra)
+# grid.arrange(pAGC_GG_X, vAGC_GG_X, aAGC_GG_X, pInnovation_X, nrow = 4)
+# grid.arrange(pAGC_GG_Y, vAGC_GG_Y, aAGC_GG_Y, pInnovation_Y, nrow = 4)
+# grid.arrange(pAGC_GG_Z, vAGC_GG_Z, aAGC_GG_Z, pInnovation_Z, nrow = 4)
+```
+
+```{r}
+
 ```
 
 
@@ -591,7 +919,7 @@ modAGC
 ```
 
 ---
-# Parece que tiene sentido imaginar que las varianzas correspondientes a diferentes ejes de un mismo sensor (acelerómetro o giróscopo) sean iguales (y en todo caso podríamos probar y contrastar). Lo mismo para las varianzas de observación. Por tanto, podemos especficar una matriz que reemplace parametros estimados en las matrices de covarianzas de nuestro modelo así:
+Parece que tiene sentido imaginar que las varianzas correspondientes a diferentes ejes de un mismo sensor (acelerómetro o giróscopo) sean iguales (y en todo caso podríamos probar y contrastar). Lo mismo para las varianzas de observación. Por tanto, podemos especficar una matriz que reemplace parametros estimados en las matrices de covarianzas de nuestro modelo así:
 ---
 ```{r eval=FALSE, include=FALSE}
 crearModAGC <- function(par) {
@@ -802,7 +1130,7 @@ plotAnglesAGC_KmpuKcalc <- function(theAxix="X"){
   {
     dfData <- data.frame(accAngle = anglesInPI(angXY.df$pitchAccY), 
                         csGyro=anglesInPI(angXY.df$csGyroY),
-                        rotationCompass=(angXY.df$pitchYcompass), 
+                        rotationCompass=anglesInPI(angXY.df$pitchYcompass), 
                         kalmanAngleMPU6050=anglesInPI(angXY.df$kalAngleY),
                         kalmanR=anglesInPI(kalmanR$Y), 
                         kalmanRCalc=anglesInPI(angXY.df$calcKalmanY), 
